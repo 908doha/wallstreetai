@@ -8,7 +8,9 @@ const masterSchema = z.object({
   name: z.string().min(1),
   slug: z.string().min(1),
   bio: z.string().min(1),
-  photoUrl: z.string().url().optional().or(z.literal("")),
+  photoUrl: z.string().url().nullable().optional().or(z.literal("")),
+  cardImageUrl: z.string().url().nullable().optional().or(z.literal("")),
+  cardTagline: z.string().nullable().optional().or(z.literal("")),
   philosophy: z.string().min(1),
   quotes: z.array(z.string()),
   keyStocks: z.array(z.string()),
@@ -42,6 +44,8 @@ export async function POST(req: NextRequest) {
       data: {
         ...data,
         photoUrl: data.photoUrl || null,
+        cardImageUrl: data.cardImageUrl || null,
+        cardTagline: data.cardTagline || null,
         slug: data.slug || slugify(data.name),
       },
     });

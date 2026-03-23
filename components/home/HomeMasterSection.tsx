@@ -11,6 +11,8 @@ interface Master {
   name: string;
   bio: string;
   photoUrl: string | null;
+  cardImageUrl?: string | null;
+  cardTagline?: string | null;
   isPremium: boolean;
   philosophy: string;
 }

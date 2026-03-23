@@ -7,7 +7,9 @@ const updateSchema = z.object({
   name: z.string().min(1).optional(),
   slug: z.string().min(1).optional(),
   bio: z.string().optional(),
-  photoUrl: z.string().url().optional().or(z.literal("")),
+  photoUrl: z.string().url().nullable().optional().or(z.literal("")),
+  cardImageUrl: z.string().url().nullable().optional().or(z.literal("")),
+  cardTagline: z.string().nullable().optional().or(z.literal("")),
   philosophy: z.string().optional(),
   quotes: z.array(z.string()).optional(),
   keyStocks: z.array(z.string()).optional(),
@@ -27,7 +29,12 @@ export async function PUT(
 
     const master = await prisma.master.update({
       where: { id },
-      data: { ...data, photoUrl: data.photoUrl || null },
+      data: {
+        ...data,
+        photoUrl: data.photoUrl || null,
+        cardImageUrl: data.cardImageUrl || null,
+        cardTagline: data.cardTagline || null,
+      },
     });
 
     return NextResponse.json({ success: true, data: master });

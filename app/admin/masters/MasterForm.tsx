@@ -5,13 +5,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Plus, X, Save } from "lucide-react";
+import { Plus, X, Save, ImageIcon } from "lucide-react";
 import type { MasterData } from "@/types";
 
 const schema = z.object({
@@ -19,6 +19,8 @@ const schema = z.object({
   slug: z.string().min(1, "슬러그를 입력하세요"),
   bio: z.string().min(10, "소개를 입력하세요"),
   photoUrl: z.string().url("올바른 URL을 입력하세요").optional().or(z.literal("")),
+  cardImageUrl: z.string().url("올바른 URL을 입력하세요").optional().or(z.literal("")),
+  cardTagline: z.string().optional().or(z.literal("")),
   philosophy: z.string().min(10, "투자 철학을 입력하세요"),
   isPremium: z.boolean(),
   isActive: z.boolean(),
@@ -40,6 +42,7 @@ export function MasterForm({ master }: MasterFormProps) {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -48,11 +51,18 @@ export function MasterForm({ master }: MasterFormProps) {
       slug: master?.slug || "",
       bio: master?.bio || "",
       photoUrl: master?.photoUrl || "",
+      cardImageUrl: (master as MasterData & { cardImageUrl?: string })?.cardImageUrl || "",
+      cardTagline: (master as MasterData & { cardTagline?: string })?.cardTagline || "",
       philosophy: master?.philosophy || "",
       isPremium: master?.isPremium || false,
       isActive: master?.isActive ?? true,
     },
   });
+
+  const cardImageUrlVal = watch("cardImageUrl");
+  const cardTaglineVal = watch("cardTagline");
+  const nameVal = watch("name");
+  const bio = watch("bio");
 
   const onSubmit = async (data: FormData) => {
     setIsSaving(true);
@@ -67,6 +77,9 @@ export function MasterForm({ master }: MasterFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
+          photoUrl: data.photoUrl || null,
+          cardImageUrl: data.cardImageUrl || null,
+          cardTagline: data.cardTagline || null,
           quotes: quotes.filter((q) => q.trim()),
           keyStocks: keyStocks.filter((s) => s.trim()),
         }),
@@ -114,6 +127,53 @@ export function MasterForm({ master }: MasterFormProps) {
           {...register("photoUrl")}
           className="bg-[#0f0f23] border-white/10 text-white"
           placeholder="https://..."
+        />
+      </div>
+
+      {/* Card Image */}
+      <div className="space-y-2">
+        <Label className="text-gray-300 flex items-center gap-2">
+          <ImageIcon className="w-4 h-4" />
+          카드 배경 이미지 URL
+          <span className="text-[11px] text-gray-500 font-normal">(홈 화면 대형 카드)</span>
+        </Label>
+        <Input
+          {...register("cardImageUrl")}
+          className="bg-[#0f0f23] border-white/10 text-white"
+          placeholder="https://... (권장 비율: 3:4)"
+        />
+        {/* Preview */}
+        {(cardImageUrlVal) && (
+          <div className="relative w-full rounded-2xl overflow-hidden bg-[#0f0f23] border border-white/10" style={{ height: 180 }}>
+            <Image
+              src={cardImageUrlVal}
+              alt="카드 미리보기"
+              fill
+              className="object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+            />
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }}
+            />
+            <div className="absolute bottom-0 left-0 p-4">
+              <p className="text-white font-black text-lg">{nameVal || "마스터 이름"}</p>
+              <p className="text-white/70 text-xs mt-0.5">{cardTaglineVal || bio || "태그라인"}</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-gray-300">
+          카드 태그라인
+          <span className="text-[11px] text-gray-500 ml-2 font-normal">(카드 하단에 표시되는 짧은 문구)</span>
+        </Label>
+        <Input
+          {...register("cardTagline")}
+          className="bg-[#0f0f23] border-white/10 text-white"
+          placeholder="예: 가치투자의 전설, 오마하의 현인"
+          maxLength={60}
         />
       </div>
 

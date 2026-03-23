@@ -104,18 +104,20 @@ model VerificationToken {
 }
 
 model Master {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  bio         String   @db.Text
-  photoUrl    String?
-  philosophy  String   @db.Text
-  quotes      String[]
-  keyStocks   String[]
-  isActive    Boolean  @default(true)
-  isPremium   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  bio          String   @db.Text
+  photoUrl     String?
+  cardImageUrl String?
+  cardTagline  String?
+  philosophy   String   @db.Text
+  quotes       String[]
+  keyStocks    String[]
+  isActive     Boolean  @default(true)
+  isPremium    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   prompts     MasterPrompt[]
   analyses    Analysis[]

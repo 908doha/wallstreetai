@@ -4,13 +4,14 @@ import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Lock } from "lucide-react";
-import { truncate } from "@/lib/utils";
 
 interface Master {
   id: string;
   name: string;
   bio: string;
   photoUrl: string | null;
+  cardImageUrl?: string | null;
+  cardTagline?: string | null;
   isPremium: boolean;
   philosophy: string;
 }
@@ -20,12 +21,13 @@ interface MasterCarouselProps {
   onMasterChange?: (master: Master) => void;
 }
 
+// 카드 이미지 없을 때 fallback 그라디언트
 const CARD_GRADIENTS = [
-  ["#1a3566", "#2563eb"],
-  ["#1a4a2e", "#16a34a"],
-  ["#3b1a6e", "#7c3aed"],
-  ["#4a1a00", "#c2410c"],
-  ["#1a3a4a", "#0891b2"],
+  { from: "#0c1f4a", accent: "#2563eb" },
+  { from: "#0f2d1a", accent: "#16a34a" },
+  { from: "#1e0e3d", accent: "#7c3aed" },
+  { from: "#2d0f00", accent: "#c2410c" },
+  { from: "#0a1e2d", accent: "#0891b2" },
 ];
 
 export function MasterCarousel({ masters, onMasterChange }: MasterCarouselProps) {
@@ -34,13 +36,12 @@ export function MasterCarousel({ masters, onMasterChange }: MasterCarouselProps)
 
   useEffect(() => {
     if (masters.length > 0) onMasterChange?.(masters[0]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [masters]);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-
     const handleScroll = () => {
       const cardWidth = el.scrollWidth / masters.length;
       const idx = Math.round(el.scrollLeft / cardWidth);
@@ -48,7 +49,6 @@ export function MasterCarousel({ masters, onMasterChange }: MasterCarouselProps)
       setActiveIndex(newIndex);
       onMasterChange?.(masters[newIndex]);
     };
-
     el.addEventListener("scroll", handleScroll, { passive: true });
     return () => el.removeEventListener("scroll", handleScroll);
   }, [masters, onMasterChange]);
@@ -57,72 +57,100 @@ export function MasterCarousel({ masters, onMasterChange }: MasterCarouselProps)
 
   return (
     <div>
-      {/* Carousel */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pb-1 snap-x snap-mandatory"
+        className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-1 snap-x snap-mandatory"
         style={{ scrollPaddingLeft: "16px" }}
       >
         {masters.map((master, i) => {
-          const [from, to] = CARD_GRADIENTS[i % CARD_GRADIENTS.length];
+          const grad = CARD_GRADIENTS[i % CARD_GRADIENTS.length];
+          const hasImage = !!master.cardImageUrl;
+
           return (
             <Link
               key={master.id}
               href={`/masters/${master.id}`}
               className="flex-shrink-0 snap-center"
-              style={{ width: "calc(78vw)", maxWidth: 300 }}
+              style={{ width: "calc(80vw)", maxWidth: 320 }}
             >
               <div
-                className="rounded-3xl p-6 flex flex-col items-center text-center h-[260px] justify-between relative overflow-hidden"
-                style={{
-                  background: `radial-gradient(ellipse at 50% 10%, ${to}55 0%, ${from} 70%)`,
-                  boxShadow: `0 8px 32px ${to}33`,
-                  border: `1px solid ${to}40`,
-                }}
+                className="relative rounded-3xl overflow-hidden"
+                style={{ height: 320 }}
               >
-                {/* Background glow */}
+                {/* Background */}
+                {hasImage ? (
+                  <Image
+                    src={master.cardImageUrl!}
+                    alt={master.name}
+                    fill
+                    className="object-cover"
+                    sizes="80vw"
+                  />
+                ) : (
+                  /* Gradient fallback with portrait */
+                  <div
+                    className="absolute inset-0 flex items-center justify-center"
+                    style={{
+                      background: `radial-gradient(ellipse at 50% 0%, ${grad.accent}55 0%, ${grad.from} 70%)`,
+                    }}
+                  >
+                    {master.photoUrl ? (
+                      <div className="relative w-40 h-40 rounded-full overflow-hidden opacity-50">
+                        <Image
+                          src={master.photoUrl}
+                          alt={master.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <span
+                        className="text-8xl font-black opacity-10 select-none"
+                        style={{ color: grad.accent }}
+                      >
+                        {master.name.charAt(0)}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Dark gradient overlay at bottom */}
                 <div
-                  className="absolute top-[-30%] left-1/2 -translate-x-1/2 w-40 h-40 rounded-full blur-3xl pointer-events-none"
-                  style={{ background: `${to}30` }}
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: hasImage
+                      ? "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.05) 100%)"
+                      : "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)",
+                  }}
                 />
 
                 {/* Premium badge */}
                 {master.isPremium && (
-                  <div className="absolute top-4 right-4 flex items-center gap-1 bg-black/30 px-2 py-0.5 rounded-full">
+                  <div className="absolute top-4 right-4 flex items-center gap-1 bg-black/40 backdrop-blur-sm px-2.5 py-1 rounded-full">
                     <Lock className="w-2.5 h-2.5 text-white/70" />
-                    <span className="text-[9px] text-white/70 font-semibold">PRO</span>
+                    <span className="text-[10px] text-white/70 font-semibold tracking-widest">PRO</span>
                   </div>
                 )}
 
-                {/* Avatar */}
-                <div
-                  className="relative w-[72px] h-[72px] rounded-full flex items-center justify-center flex-shrink-0 mt-2"
-                  style={{
-                    background: `radial-gradient(circle, ${to}60 0%, ${to}20 100%)`,
-                    border: `2px solid ${to}80`,
-                    boxShadow: `0 0 24px ${to}50`,
-                  }}
-                >
-                  {master.photoUrl ? (
+                {/* Avatar (small, top-left, only when there's a card image) */}
+                {hasImage && master.photoUrl && (
+                  <div className="absolute top-4 left-4 w-10 h-10 rounded-full overflow-hidden border-2 border-white/30 shadow-lg">
                     <Image
                       src={master.photoUrl}
                       alt={master.name}
-                      width={72}
-                      height={72}
-                      className="object-cover w-full h-full rounded-full"
+                      fill
+                      className="object-cover"
                     />
-                  ) : (
-                    <span className="text-2xl font-bold text-white">
-                      {master.name.charAt(0)}
-                    </span>
-                  )}
-                </div>
+                  </div>
+                )}
 
-                {/* Info */}
-                <div className="flex-1 flex flex-col items-center justify-center gap-1.5 px-2">
-                  <h3 className="text-[17px] font-bold text-white">{master.name}</h3>
-                  <p className="text-[12px] text-white/60 leading-relaxed">
-                    {truncate(master.bio, 60)}
+                {/* Text overlay — bottom */}
+                <div className="absolute bottom-0 left-0 right-0 px-5 pb-5 pt-10">
+                  <h3 className="text-[22px] font-black text-white leading-tight tracking-tight">
+                    {master.name}
+                  </h3>
+                  <p className="text-[13px] text-white/70 mt-1 leading-snug line-clamp-2">
+                    {master.cardTagline || master.bio}
                   </p>
                 </div>
               </div>
@@ -139,9 +167,9 @@ export function MasterCarousel({ masters, onMasterChange }: MasterCarouselProps)
               key={i}
               className="block rounded-full transition-all duration-300"
               style={{
-                width: i === activeIndex ? 16 : 5,
+                width: i === activeIndex ? 20 : 5,
                 height: 5,
-                background: i === activeIndex ? "#4F8AFF" : "rgba(255,255,255,0.18)",
+                background: i === activeIndex ? "#4F8AFF" : "rgba(255,255,255,0.15)",
               }}
             />
           ))}
