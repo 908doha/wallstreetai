@@ -13,9 +13,10 @@ async function getMaster(id: string) {
 export default async function MasterDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const master = await getMaster(params.id);
+  const { id } = await params;
+  const master = await getMaster(id);
   if (!master) notFound();
 
   return (
