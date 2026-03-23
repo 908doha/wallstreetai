@@ -14,6 +14,17 @@ interface Banner {
   iconUrl: string | null;
 }
 
+const DEFAULT_BANNERS: Banner[] = [
+  {
+    id: "__default__",
+    title: "투자 거장의 눈으로 주식을 분석하세요",
+    subtitle: "워런 버핏, 피터 린치의 철학으로 AI가 종목을 분석합니다",
+    ctaText: "지금 분석하기",
+    ctaLink: "/analysis",
+    iconUrl: null,
+  },
+];
+
 export function BannerDisplay() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -24,9 +35,10 @@ export function BannerDisplay() {
     fetch("/api/banners")
       .then((r) => r.json())
       .then((data) => {
-        if (Array.isArray(data)) setBanners(data);
+        if (Array.isArray(data) && data.length > 0) setBanners(data);
+        else setBanners(DEFAULT_BANNERS);
       })
-      .catch(() => {});
+      .catch(() => setBanners(DEFAULT_BANNERS));
   }, []);
 
   // Rotate banners every 5 seconds
