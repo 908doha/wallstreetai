@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Header } from "@/components/layout/Header";
+import { TopNav } from "@/components/layout/TopNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { RecommendationBadge } from "@/components/analysis/RecommendationBadge";
 import { formatDateTime } from "@/lib/utils";
@@ -27,7 +27,7 @@ export default async function HistoryPage() {
 
   return (
     <div>
-      <Header title="분석 히스토리" showLogo={false} />
+      <TopNav title="분석 히스토리" showLogo={false} />
 
       <div className="px-4 pt-4 space-y-3">
         {analyses.length === 0 ? (

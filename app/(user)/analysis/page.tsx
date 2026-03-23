@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Header } from "@/components/layout/Header";
+import { TopNav } from "@/components/layout/TopNav";
 import { StockSearch } from "@/components/analysis/StockSearch";
 import { MasterSelector } from "@/components/analysis/MasterSelector";
 import { AnalysisResult } from "@/components/analysis/AnalysisResult";
@@ -61,7 +61,7 @@ export default function AnalysisPage() {
 
   return (
     <div>
-      <Header title="AI 분석" showLogo={false} />
+      <TopNav title="AI 분석" showLogo={false} />
 
       <div className="px-4 pt-4 space-y-5">
         {/* Stock Search */}

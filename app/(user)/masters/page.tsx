@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Header } from "@/components/layout/Header";
+import { TopNav } from "@/components/layout/TopNav";
 import { MasterCard } from "@/components/masters/MasterCard";
 import { getMasterAccessLevel } from "@/lib/permissions";
 
@@ -25,7 +25,7 @@ export default async function MastersPage() {
 
   return (
     <div>
-      <Header title="투자 마스터" showLogo={false} />
+      <TopNav title="투자 마스터" showLogo={false} />
 
       <div className="px-4 pt-4 space-y-4">
         <p className="text-sm text-gray-400">

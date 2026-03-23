@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Header } from "@/components/layout/Header";
+import { TopNav } from "@/components/layout/TopNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -41,7 +41,7 @@ export default async function MyPage() {
 
   return (
     <div>
-      <Header title="마이페이지" showLogo={false} />
+      <TopNav title="마이페이지" showLogo={false} />
 
       <div className="px-4 pt-4 space-y-4">
         {/* Profile */}

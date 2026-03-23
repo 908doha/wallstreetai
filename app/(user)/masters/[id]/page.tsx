@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Header } from "@/components/layout/Header";
+import { TopNav } from "@/components/layout/TopNav";
 import { MasterDetail } from "@/components/masters/MasterDetail";
 import { Button } from "@/components/ui/button";
 import { BarChart2 } from "lucide-react";
@@ -20,7 +20,7 @@ export default async function MasterDetailPage({
 
   return (
     <div>
-      <Header title={master.name} showLogo={false} />
+      <TopNav title={master.name} showLogo={false} />
 
       <div className="px-4 pt-4 space-y-4">
         <MasterDetail master={master} />

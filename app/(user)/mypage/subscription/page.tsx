@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Header } from "@/components/layout/Header";
+import { TopNav } from "@/components/layout/TopNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Crown, Clock } from "lucide-react";
@@ -30,7 +30,7 @@ export default async function SubscriptionPage() {
 
   return (
     <div>
-      <Header title="구독 관리" showLogo={false} />
+      <TopNav title="구독 관리" showLogo={false} />
       <div className="px-4 pt-4 space-y-4">
         {/* 현재 플랜 */}
         <Card className="bg-[#16213e]/80 border-white/10">
