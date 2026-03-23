@@ -17,19 +17,17 @@ const updateSchema = z.object({
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await requireAdmin();
     const body = await req.json();
     const data = updateSchema.parse(body);
 
     const master = await prisma.master.update({
-      where: { id: params.id },
-      data: {
-        ...data,
-        photoUrl: data.photoUrl || null,
-      },
+      where: { id },
+      data: { ...data, photoUrl: data.photoUrl || null },
     });
 
     return NextResponse.json({ success: true, data: master });
@@ -43,17 +41,14 @@ export async function PUT(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await requireAdmin();
     const body = await req.json();
 
-    const master = await prisma.master.update({
-      where: { id: params.id },
-      data: body,
-    });
-
+    const master = await prisma.master.update({ where: { id }, data: body });
     return NextResponse.json({ success: true, data: master });
   } catch (error) {
     if (error instanceof Error && error.message === "FORBIDDEN") {
@@ -65,11 +60,12 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await requireAdmin();
-    await prisma.master.delete({ where: { id: params.id } });
+    await prisma.master.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof Error && error.message === "FORBIDDEN") {

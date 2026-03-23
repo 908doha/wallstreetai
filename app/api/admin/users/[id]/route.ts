@@ -10,13 +10,14 @@ const updateSchema = z.object({
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await requireAdmin();
 
     const user = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         subscription: { include: { plan: { include: { featureConfig: true } } } },
         analyses: { take: 10, orderBy: { createdAt: "desc" }, include: { master: { select: { name: true } } } },
@@ -39,18 +40,15 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await requireAdmin();
     const body = await req.json();
     const data = updateSchema.parse(body);
 
-    const user = await prisma.user.update({
-      where: { id: params.id },
-      data,
-    });
-
+    const user = await prisma.user.update({ where: { id }, data });
     return NextResponse.json({ success: true, data: user });
   } catch (error) {
     if (error instanceof Error && error.message === "FORBIDDEN") {

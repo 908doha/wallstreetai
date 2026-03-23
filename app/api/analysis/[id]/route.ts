@@ -4,16 +4,16 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { searchParams } = new URL(req.url);
     const shareToken = searchParams.get("share");
 
     let analysis;
 
     if (shareToken) {
-      // Public share link
       analysis = await prisma.analysis.findUnique({
         where: { shareToken },
         include: { master: true },
@@ -29,7 +29,7 @@ export async function GET(
 
       analysis = await prisma.analysis.findUnique({
         where: {
-          id: params.id,
+          id,
           userId: session.user.role === "admin" ? undefined : session.user.id,
         },
         include: { master: true },
