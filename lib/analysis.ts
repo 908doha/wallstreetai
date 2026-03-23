@@ -78,7 +78,7 @@ export async function executeAnalysis({
     ticker: analysis.ticker,
     companyName: analysis.companyName,
     recommendation: analysis.recommendation,
-    quantMetrics: analysis.quantMetrics as import("@/types").QuantMetrics,
+    quantMetrics: analysis.quantMetrics as unknown as import("@/types").QuantMetrics,
     masterComment: analysis.masterComment,
     score: analysis.score,
     shareToken: analysis.shareToken,
