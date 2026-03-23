@@ -10,20 +10,23 @@ import { TrendingUp, BarChart2, Star, ChevronRight } from "lucide-react";
 import { formatDateTime, truncate } from "@/lib/utils";
 
 async function getHomeData() {
-  const [masters, recentAnalyses] = await Promise.all([
-    prisma.master.findMany({
-      where: { isActive: true },
-      take: 4,
-      orderBy: { createdAt: "asc" },
-    }),
-    prisma.analysis.findMany({
-      take: 5,
-      orderBy: { createdAt: "desc" },
-      include: { master: { select: { name: true, photoUrl: true } } },
-    }),
-  ]);
-
-  return { masters, recentAnalyses };
+  try {
+    const [masters, recentAnalyses] = await Promise.all([
+      prisma.master.findMany({
+        where: { isActive: true },
+        take: 4,
+        orderBy: { createdAt: "asc" },
+      }),
+      prisma.analysis.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        include: { master: { select: { name: true, photoUrl: true } } },
+      }),
+    ]);
+    return { masters, recentAnalyses };
+  } catch {
+    return { masters: [], recentAnalyses: [] };
+  }
 }
 
 export default async function HomePage() {
