@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getPopularStocks } from "@/lib/stock";
 import { TopNav } from "@/components/layout/TopNav";
 import { Footer } from "@/components/layout/Footer";
 import { PopularTicker } from "@/components/home/PopularTicker";
@@ -49,7 +50,19 @@ async function getHomeData() {
       })
     );
 
-    return { masters, recentAnalyses, popularStocks };
+    // DB에 분석 데이터가 없으면 하드코딩된 인기 종목으로 폴백
+    const fallback = getPopularStocks().slice(0, 10).map((s) => ({
+      ticker: s.ticker,
+      companyName: s.name,
+      count: 0,
+      topRecommendation: undefined,
+    }));
+
+    return {
+      masters,
+      recentAnalyses,
+      popularStocks: popularStocks.length > 0 ? popularStocks : fallback,
+    };
   } catch {
     return { masters: [], recentAnalyses: [], popularStocks: [] };
   }
