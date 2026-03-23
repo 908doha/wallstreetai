@@ -26,6 +26,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko" className="dark">
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css"
+        />
+      </head>
       <body className="font-sans antialiased">
         {children}
         <Toaster />

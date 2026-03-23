@@ -29,6 +29,7 @@ export async function POST(req: Request) {
       subtitle: body.subtitle || null,
       ctaText: body.ctaText || null,
       ctaLink: body.ctaLink || null,
+      iconUrl: body.iconUrl || null,
       isActive: body.isActive ?? true,
       order: body.order ?? 0,
     },

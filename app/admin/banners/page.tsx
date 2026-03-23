@@ -17,6 +17,7 @@ interface Banner {
   subtitle: string | null;
   ctaText: string | null;
   ctaLink: string | null;
+  iconUrl: string | null;
   isActive: boolean;
   order: number;
   createdAt: string;
@@ -27,6 +28,7 @@ const EMPTY: Omit<Banner, "id" | "createdAt"> = {
   subtitle: "",
   ctaText: "",
   ctaLink: "",
+  iconUrl: "",
   isActive: true,
   order: 0,
 };
@@ -134,6 +136,15 @@ export default function BannersAdminPage() {
                 onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })}
               />
             </div>
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">아이콘 이미지 URL</label>
+              <input
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-[#4F8AFF]/60"
+                placeholder="https://... (로고/아이콘 이미지 URL)"
+                value={editing.iconUrl ?? ""}
+                onChange={(e) => setEditing({ ...editing, iconUrl: e.target.value })}
+              />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-gray-400 block mb-1">버튼 텍스트</label>
@@ -145,7 +156,7 @@ export default function BannersAdminPage() {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-400 block mb-1">버튼 링크</label>
+                <label className="text-xs text-gray-400 block mb-1">링크 URL</label>
                 <input
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-[#4F8AFF]/60"
                   placeholder="https://..."
@@ -235,9 +246,14 @@ export default function BannersAdminPage() {
                 {banner.subtitle && (
                   <p className="text-xs text-gray-400">{banner.subtitle}</p>
                 )}
-                {banner.ctaText && banner.ctaLink && (
+                {banner.iconUrl && (
+                  <p className="text-xs text-gray-500 mt-1 truncate">
+                    🖼 {banner.iconUrl}
+                  </p>
+                )}
+                {(banner.ctaText || banner.ctaLink) && (
                   <p className="text-xs text-gray-500 mt-1">
-                    버튼: {banner.ctaText} → {banner.ctaLink}
+                    {banner.ctaText && `버튼: ${banner.ctaText}`}{banner.ctaLink && ` → ${banner.ctaLink}`}
                   </p>
                 )}
               </div>

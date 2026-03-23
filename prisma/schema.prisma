@@ -231,6 +231,7 @@ model Banner {
   subtitle  String?
   ctaText   String?
   ctaLink   String?
+  iconUrl   String?
   isActive  Boolean  @default(true)
   order     Int      @default(0)
   createdAt DateTime @default(now())

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { X, ChevronRight } from "lucide-react";
+import Image from "next/image";
+import { X } from "lucide-react";
 
 interface Banner {
   id: string;
@@ -10,6 +11,7 @@ interface Banner {
   subtitle: string | null;
   ctaText: string | null;
   ctaLink: string | null;
+  iconUrl: string | null;
 }
 
 export function BannerDisplay() {
@@ -46,37 +48,58 @@ export function BannerDisplay() {
 
   const banner = visible[currentIndex % visible.length];
 
-  return (
+  const inner = (
     <div
-      className="glass-card rounded-2xl p-4 flex items-center gap-3 transition-all duration-200"
+      className="glass-card rounded-2xl p-4 flex items-center gap-4 transition-all duration-200 relative"
       style={{ opacity: animating ? 0 : 1 }}
     >
+      {/* Text content */}
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-bold text-white leading-snug">{banner.title}</p>
         {banner.subtitle && (
-          <p className="text-[11px] text-white/50 mt-0.5">{banner.subtitle}</p>
+          <p className="text-[11px] text-white/45 mb-1">{banner.subtitle}</p>
+        )}
+        <p className="text-[22px] font-bold text-white leading-snug">{banner.title}</p>
+        {banner.ctaText && !banner.ctaLink && (
+          <p className="text-[12px] text-[#4F8AFF] mt-1 font-semibold">{banner.ctaText}</p>
         )}
       </div>
 
-      {banner.ctaText && banner.ctaLink && (
-        <Link
-          href={banner.ctaLink}
-          className="flex-shrink-0 inline-flex items-center gap-1 text-[12px] font-semibold text-[#4F8AFF] hover:text-white transition-colors"
-        >
-          {banner.ctaText}
-          <ChevronRight className="w-3.5 h-3.5" />
-        </Link>
+      {/* Icon */}
+      {banner.iconUrl && (
+        <div className="flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden glass flex items-center justify-center">
+          <Image
+            src={banner.iconUrl}
+            alt={banner.title}
+            width={56}
+            height={56}
+            className="object-contain w-full h-full"
+            unoptimized
+          />
+        </div>
       )}
 
+      {/* Dismiss button */}
       <button
-        onClick={() => {
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
           setDismissed((prev) => new Set([...prev, banner.id]));
           setCurrentIndex(0);
         }}
-        className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full glass hover:bg-white/10 transition-colors"
+        className="absolute top-3 right-3 w-5 h-5 flex items-center justify-center rounded-full glass hover:bg-white/10 transition-colors"
       >
-        <X className="w-3.5 h-3.5 text-white/40" />
+        <X className="w-3 h-3 text-white/40" />
       </button>
     </div>
   );
+
+  if (banner.ctaLink) {
+    return (
+      <Link href={banner.ctaLink} target="_blank" rel="noopener noreferrer" className="block">
+        {inner}
+      </Link>
+    );
+  }
+
+  return inner;
 }

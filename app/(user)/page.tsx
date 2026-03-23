@@ -6,6 +6,7 @@ import { TopNav } from "@/components/layout/TopNav";
 import { Footer } from "@/components/layout/Footer";
 import { PopularTicker } from "@/components/home/PopularTicker";
 import { BannerDisplay } from "@/components/home/BannerDisplay";
+import { MasterCarousel } from "@/components/home/MasterCarousel";
 import { RecommendationBadge } from "@/components/analysis/RecommendationBadge";
 import { TrendingUp, BarChart2, Star, ChevronRight, Zap } from "lucide-react";
 import { formatDateTime, truncate } from "@/lib/utils";
@@ -101,7 +102,7 @@ export default async function HomePage() {
 
         {/* ── Masters ──────────────────────────────────── */}
         <section>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 px-0">
             <h2 className="text-[13px] font-semibold text-white/90 uppercase tracking-widest">
               투자 마스터
             </h2>
@@ -112,32 +113,8 @@ export default async function HomePage() {
               전체보기 <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
-
-          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
-            {masters.map((master) => (
-              <Link key={master.id} href={`/masters/${master.id}`}>
-                <div className="flex flex-col items-center gap-2.5 w-[68px] flex-shrink-0">
-                  <div className="w-[56px] h-[56px] rounded-full glass-gold border border-[#4F8AFF]/25 flex items-center justify-center overflow-hidden transition-transform hover:scale-105">
-                    {master.photoUrl ? (
-                      <Image
-                        src={master.photoUrl}
-                        alt={master.name}
-                        width={56}
-                        height={56}
-                        className="object-cover w-full h-full"
-                      />
-                    ) : (
-                      <span className="text-[20px] font-bold text-[#4F8AFF]">
-                        {master.name.charAt(0)}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[10px] text-white/60 text-center leading-tight px-0.5">
-                    {master.name.split(" ").slice(-1)[0]}
-                  </span>
-                </div>
-              </Link>
-            ))}
+          <div className="-mx-4">
+            <MasterCarousel masters={masters} />
           </div>
         </section>
 

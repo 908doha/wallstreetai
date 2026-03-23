@@ -21,6 +21,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       ...(body.subtitle !== undefined && { subtitle: body.subtitle }),
       ...(body.ctaText !== undefined && { ctaText: body.ctaText }),
       ...(body.ctaLink !== undefined && { ctaLink: body.ctaLink }),
+      ...(body.iconUrl !== undefined && { iconUrl: body.iconUrl || null }),
       ...(body.isActive !== undefined && { isActive: body.isActive }),
       ...(body.order !== undefined && { order: body.order }),
     },

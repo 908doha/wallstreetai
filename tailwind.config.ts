@@ -93,7 +93,7 @@ const config: Config = {
         "spin-slow": "spin-slow 3s linear infinite",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        sans: ["Pretendard Variable", "Pretendard", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
       },
     },
