@@ -5,13 +5,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { Plus, X, Save, ImageIcon } from "lucide-react";
+import { ImageUploader } from "@/components/admin/ImageUploader";
+import { Plus, X, Save } from "lucide-react";
 import type { MasterData } from "@/types";
 
 const schema = z.object({
@@ -43,6 +43,7 @@ export function MasterForm({ master }: MasterFormProps) {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -121,47 +122,30 @@ export function MasterForm({ master }: MasterFormProps) {
         </div>
       </div>
 
+      {/* 프로필 사진 */}
       <div className="space-y-1.5">
-        <Label className="text-gray-300">프로필 사진 URL</Label>
-        <Input
-          {...register("photoUrl")}
-          className="bg-[#0f0f23] border-white/10 text-white"
-          placeholder="https://..."
+        <ImageUploader
+          label="프로필 사진"
+          hint="(아바타에 사용)"
+          value={watch("photoUrl") || ""}
+          onChange={(url) => setValue("photoUrl", url, { shouldValidate: true })}
+          previewHeight={160}
         />
       </div>
 
-      {/* Card Image */}
-      <div className="space-y-2">
-        <Label className="text-gray-300 flex items-center gap-2">
-          <ImageIcon className="w-4 h-4" />
-          카드 배경 이미지 URL
-          <span className="text-[11px] text-gray-500 font-normal">(홈 화면 대형 카드)</span>
-        </Label>
-        <Input
-          {...register("cardImageUrl")}
-          className="bg-[#0f0f23] border-white/10 text-white"
-          placeholder="https://... (권장 비율: 3:4)"
+      {/* 카드 배경 이미지 */}
+      <div className="space-y-1.5">
+        <ImageUploader
+          label="카드 배경 이미지"
+          hint="(홈 화면 대형 카드 · 권장 비율 3:4)"
+          value={cardImageUrlVal || ""}
+          onChange={(url) => setValue("cardImageUrl", url, { shouldValidate: true })}
+          previewHeight={240}
+          overlayText={{
+            title: nameVal || "마스터 이름",
+            subtitle: cardTaglineVal || bio || "태그라인",
+          }}
         />
-        {/* Preview */}
-        {(cardImageUrlVal) && (
-          <div className="relative w-full rounded-2xl overflow-hidden bg-[#0f0f23] border border-white/10" style={{ height: 180 }}>
-            <Image
-              src={cardImageUrlVal}
-              alt="카드 미리보기"
-              fill
-              className="object-cover"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-            />
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)" }}
-            />
-            <div className="absolute bottom-0 left-0 p-4">
-              <p className="text-white font-black text-lg">{nameVal || "마스터 이름"}</p>
-              <p className="text-white/70 text-xs mt-0.5">{cardTaglineVal || bio || "태그라인"}</p>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="space-y-1.5">
