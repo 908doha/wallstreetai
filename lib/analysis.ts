@@ -1,5 +1,5 @@
 import { prisma } from "./prisma";
-import { fetchStockData } from "./stock";
+import { searchStocks } from "./stock";
 import { runAnalysis, DEFAULT_QUANT_PROMPT, DEFAULT_MASTER_PROMPTS } from "./claude";
 import type { AnalysisResult } from "@/types";
 import { v4 as uuidv4 } from "uuid";
@@ -13,14 +13,23 @@ export async function executeAnalysis({
   masterId: string;
   userId?: string;
 }): Promise<AnalysisResult> {
+  const upperTicker = ticker.toUpperCase();
+
   // Fetch master
   const master = await prisma.master.findUnique({
     where: { id: masterId, isActive: true },
   });
   if (!master) throw new Error("Master not found");
 
-  // Fetch stock data
-  const stockData = await fetchStockData(ticker);
+  // Get company name via search (best-effort)
+  let companyName = upperTicker;
+  try {
+    const results = await searchStocks(upperTicker);
+    const match = results.find((r) => r.ticker === upperTicker);
+    if (match) companyName = match.name;
+  } catch {
+    // fallback to ticker
+  }
 
   // Get active quant prompt
   const quantPromptRecord = await prisma.quantPrompt.findFirst({
@@ -37,11 +46,10 @@ export async function executeAnalysis({
   const masterPrompt =
     masterPromptRecord?.content || DEFAULT_MASTER_PROMPTS[master.slug] || "";
 
-  // Run Claude analysis
+  // Run Claude analysis (pure LLM, no external data)
   const claudeResult = await runAnalysis({
-    ticker: stockData.ticker,
-    companyName: stockData.companyName,
-    metrics: stockData.metrics,
+    ticker: upperTicker,
+    companyName,
     quantPrompt,
     masterPrompt,
     masterName: master.name,
@@ -52,17 +60,15 @@ export async function executeAnalysis({
     data: {
       userId: userId || null,
       masterId,
-      ticker: stockData.ticker,
-      companyName: stockData.companyName,
+      ticker: upperTicker,
+      companyName,
       recommendation: claudeResult.recommendation,
-      quantMetrics: stockData.metrics as object,
+      quantMetrics: (claudeResult.quantMetrics || {}) as object,
       masterComment: claudeResult.masterComment,
       score: Math.round(claudeResult.score),
       shareToken: uuidv4(),
     },
-    include: {
-      master: true,
-    },
+    include: { master: true },
   });
 
   return {
@@ -104,9 +110,7 @@ export async function checkDailyLimit(userId: string): Promise<{
     include: {
       subscription: {
         include: {
-          plan: {
-            include: { featureConfig: true },
-          },
+          plan: { include: { featureConfig: true } },
         },
       },
     },
@@ -121,31 +125,19 @@ export async function checkDailyLimit(userId: string): Promise<{
   today.setHours(0, 0, 0, 0);
 
   const usedToday = await prisma.analysis.count({
-    where: {
-      userId,
-      createdAt: { gte: today },
-    },
+    where: { userId, createdAt: { gte: today } },
   });
 
-  return {
-    allowed: usedToday < dailyLimit,
-    used: usedToday,
-    limit: dailyLimit,
-  };
+  return { allowed: usedToday < dailyLimit, used: usedToday, limit: dailyLimit };
 }
 
-export async function canAccessMaster(
-  userId: string,
-  masterId: string
-): Promise<boolean> {
+export async function canAccessMaster(userId: string, masterId: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
       subscription: {
         include: {
-          plan: {
-            include: { featureConfig: true },
-          },
+          plan: { include: { featureConfig: true } },
         },
       },
     },
@@ -156,7 +148,6 @@ export async function canAccessMaster(
   const masterAccess = user.subscription?.plan?.featureConfig?.masterAccess;
   if (masterAccess === "ALL") return true;
 
-  // BASIC access: only non-premium masters
   const master = await prisma.master.findUnique({
     where: { id: masterId },
     select: { isPremium: true },

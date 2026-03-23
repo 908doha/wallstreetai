@@ -105,6 +105,7 @@ export interface ClaudeAnalysisResponse {
   score: number;
   masterComment: string;
   reasoning: string;
+  quantMetrics?: Partial<QuantMetrics>;
 }
 
 export interface DashboardStats {

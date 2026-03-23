@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { QuantMetrics, ClaudeAnalysisResponse } from "@/types";
+import type { ClaudeAnalysisResponse } from "@/types";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -8,50 +8,54 @@ const client = new Anthropic({
 export async function runAnalysis({
   ticker,
   companyName,
-  metrics,
   quantPrompt,
   masterPrompt,
   masterName,
 }: {
   ticker: string;
   companyName: string;
-  metrics: QuantMetrics;
   quantPrompt: string;
   masterPrompt: string;
   masterName: string;
 }): Promise<ClaudeAnalysisResponse> {
-  const metricsText = formatMetrics(metrics);
-
   const systemPrompt = `${quantPrompt}
 
 ${masterPrompt}
 
-You are analyzing stocks from the perspective of ${masterName}. Always respond with a JSON object in the following format:
+당신은 ${masterName}의 관점에서 주식을 분석합니다. 반드시 아래 JSON 형식으로만 응답하세요:
 {
   "recommendation": "BUY" | "HOLD" | "SELL",
-  "score": <number 0-100>,
-  "masterComment": "<comment in the voice and style of ${masterName}, 2-4 paragraphs in Korean>",
-  "reasoning": "<brief reasoning in Korean>"
+  "score": <0-100 사이의 정수>,
+  "masterComment": "<${masterName}의 말투와 스타일로 작성한 한국어 코멘트, 3-4 문단>",
+  "reasoning": "<한국어로 간략한 근거>",
+  "quantMetrics": {
+    "per": <PER 추정값 또는 null>,
+    "pbr": <PBR 추정값 또는 null>,
+    "roe": <ROE % 추정값 또는 null>,
+    "eps": <EPS 추정값 또는 null>,
+    "revenueGrowth": <매출성장률 % 추정값 또는 null>,
+    "debtRatio": <부채비율 추정값 또는 null>,
+    "marketCap": <시가총액 추정값(USD) 또는 null>,
+    "currentPrice": <현재 주가 추정값 또는 null>,
+    "dividendYield": <배당수익률 % 추정값 또는 null>,
+    "beta": <베타 추정값 또는 null>,
+    "fiftyTwoWeekHigh": null,
+    "fiftyTwoWeekLow": null,
+    "volume": null,
+    "averageVolume": null
+  }
 }`;
 
-  const userMessage = `다음 주식을 분석해주세요:
+  const userMessage = `다음 종목을 ${masterName}의 투자 철학으로 분석해주세요:
 
 종목: ${ticker} (${companyName})
 
-퀀트 지표:
-${metricsText}
-
-${masterName}의 투자 철학과 기준으로 이 주식을 평가하고 매수/보유/매도 의견을 제시해주세요.`;
+당신이 알고 있는 이 기업의 재무 정보, 사업 모델, 경쟁력, 시장 포지션을 바탕으로 ${masterName}의 관점에서 투자 의견(매수/보유/매도)과 코멘트를 제시하세요. 알고 있는 범위 내에서 주요 퀀트 지표도 추정하여 포함해주세요.`;
 
   const response = await client.messages.create({
     model: "claude-opus-4-5",
-    max_tokens: 1500,
-    messages: [
-      {
-        role: "user",
-        content: userMessage,
-      },
-    ],
+    max_tokens: 2000,
+    messages: [{ role: "user", content: userMessage }],
     system: systemPrompt,
   });
 
@@ -61,8 +65,6 @@ ${masterName}의 투자 철학과 기준으로 이 주식을 평가하고 매수
   }
 
   const text = content.text.trim();
-
-  // Extract JSON from response
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     throw new Error("Could not parse JSON from Claude response");
@@ -70,7 +72,6 @@ ${masterName}의 투자 철학과 기준으로 이 주식을 평가하고 매수
 
   const parsed = JSON.parse(jsonMatch[0]) as ClaudeAnalysisResponse;
 
-  // Validate
   if (!["BUY", "HOLD", "SELL"].includes(parsed.recommendation)) {
     throw new Error("Invalid recommendation from Claude");
   }
@@ -79,53 +80,6 @@ ${masterName}의 투자 철학과 기준으로 이 주식을 평가하고 매수
   }
 
   return parsed;
-}
-
-function formatMetrics(metrics: QuantMetrics): string {
-  const lines: string[] = [];
-
-  if (metrics.currentPrice !== null) {
-    lines.push(`현재 주가: $${metrics.currentPrice.toFixed(2)}`);
-  }
-  if (metrics.marketCap !== null) {
-    lines.push(`시가총액: ${formatMarketCap(metrics.marketCap)}`);
-  }
-  if (metrics.per !== null) {
-    lines.push(`PER (주가수익비율): ${metrics.per.toFixed(2)}배`);
-  }
-  if (metrics.pbr !== null) {
-    lines.push(`PBR (주가순자산비율): ${metrics.pbr.toFixed(2)}배`);
-  }
-  if (metrics.roe !== null) {
-    lines.push(`ROE (자기자본이익률): ${metrics.roe.toFixed(2)}%`);
-  }
-  if (metrics.eps !== null) {
-    lines.push(`EPS (주당순이익): $${metrics.eps.toFixed(2)}`);
-  }
-  if (metrics.revenueGrowth !== null) {
-    lines.push(`매출 성장률 (YoY): ${metrics.revenueGrowth.toFixed(2)}%`);
-  }
-  if (metrics.debtRatio !== null) {
-    lines.push(`부채비율: ${metrics.debtRatio.toFixed(2)}`);
-  }
-  if (metrics.dividendYield !== null) {
-    lines.push(`배당수익률: ${metrics.dividendYield.toFixed(2)}%`);
-  }
-  if (metrics.beta !== null) {
-    lines.push(`베타: ${metrics.beta.toFixed(2)}`);
-  }
-  if (metrics.fiftyTwoWeekHigh !== null && metrics.fiftyTwoWeekLow !== null) {
-    lines.push(`52주 최고: $${metrics.fiftyTwoWeekHigh.toFixed(2)} / 최저: $${metrics.fiftyTwoWeekLow.toFixed(2)}`);
-  }
-
-  return lines.join("\n");
-}
-
-function formatMarketCap(cap: number): string {
-  if (cap >= 1e12) return `$${(cap / 1e12).toFixed(2)}T`;
-  if (cap >= 1e9) return `$${(cap / 1e9).toFixed(2)}B`;
-  if (cap >= 1e6) return `$${(cap / 1e6).toFixed(2)}M`;
-  return `$${cap.toFixed(0)}`;
 }
 
 export const DEFAULT_QUANT_PROMPT = `당신은 전문 주식 분석가입니다. 다음 퀀트 분석 기준을 적용하여 주식을 평가하세요:
