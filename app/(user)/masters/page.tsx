@@ -55,7 +55,7 @@ export default async function MastersPage() {
               <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                 프리미엄 마스터
               </h2>
-              <span className="text-[9px] bg-[#f0b429]/20 text-[#f0b429] border border-[#f0b429]/30 px-1.5 py-0.5 rounded-full font-bold">
+              <span className="text-[9px] bg-[#4F8AFF]/20 text-[#4F8AFF] border border-[#4F8AFF]/30 px-1.5 py-0.5 rounded-full font-bold">
                 PRO+
               </span>
             </div>

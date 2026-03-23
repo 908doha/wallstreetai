@@ -11,6 +11,7 @@ import {
   CreditCard,
   TrendingUp,
   LogOut,
+  Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
@@ -23,6 +24,7 @@ const navItems = [
   { href: "/admin/users", icon: UserCog, label: "사용자 관리" },
   { href: "/admin/access-control", icon: Shield, label: "접근 제어" },
   { href: "/admin/payments", icon: CreditCard, label: "결제 관리" },
+  { href: "/admin/banners", icon: Megaphone, label: "배너 관리" },
 ];
 
 export function AdminSidebar() {
@@ -31,7 +33,7 @@ export function AdminSidebar() {
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-white/10 bg-[#0f0f23] flex flex-col">
       <div className="flex items-center gap-2 h-16 px-6 border-b border-white/10">
-        <div className="flex items-center justify-center w-8 h-8 bg-[#f0b429] rounded-lg">
+        <div className="flex items-center justify-center w-8 h-8 bg-[#4F8AFF] rounded-lg">
           <TrendingUp className="w-5 h-5 text-[#1a1a2e]" strokeWidth={2.5} />
         </div>
         <div>
@@ -53,7 +55,7 @@ export function AdminSidebar() {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-[#f0b429]/20 text-[#f0b429]"
+                  ? "bg-[#4F8AFF]/20 text-[#4F8AFF]"
                   : "text-gray-400 hover:bg-white/5 hover:text-white"
               )}
             >

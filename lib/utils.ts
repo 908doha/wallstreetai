@@ -114,7 +114,7 @@ export function getRecommendationBgColor(recommendation: string): string {
 
 export function getScoreColor(score: number): string {
   if (score >= 70) return "#22c55e";
-  if (score >= 40) return "#f0b429";
+  if (score >= 40) return "#4F8AFF";
   return "#ef4444";
 }
 

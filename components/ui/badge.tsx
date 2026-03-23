@@ -14,7 +14,7 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
-        gold: "border-transparent bg-[#f0b429] text-[#1a1a2e] hover:bg-[#d4880a]",
+        gold: "border-transparent bg-[#4F8AFF] text-[#1a1a2e] hover:bg-[#2563EB]",
         buy: "border-green-500/30 bg-green-500/20 text-green-400",
         sell: "border-red-500/30 bg-red-500/20 text-red-400",
         hold: "border-yellow-500/30 bg-yellow-500/20 text-yellow-400",

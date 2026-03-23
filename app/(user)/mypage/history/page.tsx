@@ -37,7 +37,7 @@ export default async function HistoryPage() {
             </div>
             <p className="text-sm text-gray-400 mb-2">분석 이력이 없습니다</p>
             <Link href="/analysis">
-              <span className="text-sm text-[#f0b429] hover:underline">
+              <span className="text-sm text-[#4F8AFF] hover:underline">
                 첫 번째 분석하기
               </span>
             </Link>
@@ -68,7 +68,7 @@ export default async function HistoryPage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-[#f0b429]">
+                    <p className="text-lg font-bold text-[#4F8AFF]">
                       {analysis.score}
                     </p>
                     <p className="text-[10px] text-gray-500">점수</p>

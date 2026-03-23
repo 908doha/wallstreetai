@@ -64,7 +64,7 @@ export function LoginForm() {
     <div className="w-full max-w-sm mx-auto space-y-6">
       {/* Logo */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-14 h-14 bg-[#f0b429] rounded-2xl mb-4">
+        <div className="inline-flex items-center justify-center w-14 h-14 bg-[#4F8AFF] rounded-2xl mb-4">
           <TrendingUp className="w-8 h-8 text-[#1a1a2e]" strokeWidth={2.5} />
         </div>
         <h1 className="text-2xl font-bold text-white">로그인</h1>
@@ -122,7 +122,7 @@ export function LoginForm() {
         <div className="flex justify-end">
           <Link
             href="/auth/reset-password"
-            className="text-xs text-[#f0b429] hover:underline"
+            className="text-xs text-[#4F8AFF] hover:underline"
           >
             비밀번호 찾기
           </Link>
@@ -175,7 +175,7 @@ export function LoginForm() {
 
       <p className="text-center text-sm text-gray-400">
         계정이 없으신가요?{" "}
-        <Link href="/auth/register" className="text-[#f0b429] hover:underline font-medium">
+        <Link href="/auth/register" className="text-[#4F8AFF] hover:underline font-medium">
           회원가입
         </Link>
       </p>

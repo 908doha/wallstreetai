@@ -64,10 +64,10 @@ export function TopNav({ title, showLogo = true, rightElement }: TopNavProps) {
           {showLogo ? (
             <Link href="/" className="flex items-center gap-2.5">
               <div className="flex items-center justify-center w-8 h-8 glass-gold rounded-xl">
-                <TrendingUp className="w-4 h-4 text-[#f0b429]" strokeWidth={2.5} />
+                <TrendingUp className="w-4 h-4 text-[#4F8AFF]" strokeWidth={2.5} />
               </div>
               <span className="font-bold text-[15px] tracking-tight text-white">
-                Wall Street <span className="text-[#f0b429]">AI</span>
+                Wall Street <span className="text-[#4F8AFF]">AI</span>
               </span>
             </Link>
           ) : (
@@ -145,8 +145,8 @@ export function TopNav({ title, showLogo = true, rightElement }: TopNavProps) {
                     className={cn(
                       "py-4 text-[22px] font-semibold tracking-tight transition-colors border-b border-white/[0.06] last:border-none",
                       isActive
-                        ? "text-[#f0b429]"
-                        : "text-white/90 hover:text-[#f0b429]"
+                        ? "text-[#4F8AFF]"
+                        : "text-white/90 hover:text-[#4F8AFF]"
                     )}
                   >
                     {item.label}
@@ -160,7 +160,7 @@ export function TopNav({ title, showLogo = true, rightElement }: TopNavProps) {
               <Link
                 href="/auth/login"
                 onClick={closeMenu}
-                className="block w-full h-12 rounded-2xl bg-[#f0b429] text-[#0a0a1a] font-bold text-[15px] flex items-center justify-center transition-opacity hover:opacity-90 active:opacity-80"
+                className="block w-full h-12 rounded-2xl bg-[#4F8AFF] text-[#0a0a1a] font-bold text-[15px] flex items-center justify-center transition-opacity hover:opacity-90 active:opacity-80"
               >
                 로그인
               </Link>

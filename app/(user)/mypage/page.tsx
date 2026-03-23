@@ -48,9 +48,9 @@ export default async function MyPage() {
         <Card className="bg-[#16213e]/80 border-white/10">
           <CardContent className="pt-5 pb-5">
             <div className="flex items-center gap-4">
-              <Avatar className="w-16 h-16 border-2 border-[#f0b429]/30">
+              <Avatar className="w-16 h-16 border-2 border-[#4F8AFF]/30">
                 <AvatarImage src={user.image || ""} alt={user.name || ""} />
-                <AvatarFallback className="bg-[#f0b429]/20 text-[#f0b429] text-lg font-bold">
+                <AvatarFallback className="bg-[#4F8AFF]/20 text-[#4F8AFF] text-lg font-bold">
                   {user.name ? getInitials(user.name) : <User className="w-6 h-6" />}
                 </AvatarFallback>
               </Avatar>
@@ -79,7 +79,7 @@ export default async function MyPage() {
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-gray-300">구독 플랜</h3>
               <Link href="/mypage/subscription">
-                <Button variant="ghost" size="sm" className="text-xs text-[#f0b429] h-7">
+                <Button variant="ghost" size="sm" className="text-xs text-[#4F8AFF] h-7">
                   관리하기
                 </Button>
               </Link>
@@ -129,8 +129,8 @@ export default async function MyPage() {
 
             <Link href="/mypage/subscription">
               <div className="flex items-center gap-3 py-3 px-1 hover:bg-white/5 rounded-lg transition-colors">
-                <div className="w-9 h-9 bg-[#f0b429]/20 rounded-lg flex items-center justify-center">
-                  <CreditCard className="w-5 h-5 text-[#f0b429]" />
+                <div className="w-9 h-9 bg-[#4F8AFF]/20 rounded-lg flex items-center justify-center">
+                  <CreditCard className="w-5 h-5 text-[#4F8AFF]" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-white">구독 및 결제</p>

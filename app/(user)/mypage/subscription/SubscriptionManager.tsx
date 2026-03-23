@@ -77,7 +77,7 @@ export function SubscriptionManager({
     <div className="space-y-4">
       {/* Current Plan Status */}
       {currentPlan && (
-        <Card className="bg-gradient-to-r from-[#f0b429]/20 to-amber-600/20 border-[#f0b429]/30">
+        <Card className="bg-gradient-to-r from-[#4F8AFF]/20 to-amber-600/20 border-[#4F8AFF]/30">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-center justify-between">
               <div>
@@ -95,7 +95,7 @@ export function SubscriptionManager({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-[#f0b429]/50 text-[#f0b429]"
+                  className="border-[#4F8AFF]/50 text-[#4F8AFF]"
                   onClick={handleManage}
                   disabled={loadingPlan === "portal"}
                 >
@@ -122,7 +122,7 @@ export function SubscriptionManager({
               key={plan.id}
               className={`border transition-all ${
                 isCurrent
-                  ? "border-[#f0b429] bg-[#f0b429]/5"
+                  ? "border-[#4F8AFF] bg-[#4F8AFF]/5"
                   : "border-white/10 bg-[#16213e]/80"
               }`}
             >
@@ -146,7 +146,7 @@ export function SubscriptionManager({
                       <span className="text-lg font-bold text-white">무료</span>
                     ) : (
                       <div>
-                        <span className="text-lg font-bold text-[#f0b429]">
+                        <span className="text-lg font-bold text-[#4F8AFF]">
                           ₩{plan.price.toLocaleString()}
                         </span>
                         <span className="text-xs text-gray-400">/월</span>

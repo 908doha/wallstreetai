@@ -15,11 +15,11 @@ export function Header({ title, showLogo = true, rightElement }: HeaderProps) {
       <div className="mx-auto max-w-[390px] flex items-center justify-between h-14 px-4">
         {showLogo ? (
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 bg-[#f0b429] rounded-lg">
+            <div className="flex items-center justify-center w-8 h-8 bg-[#4F8AFF] rounded-lg">
               <TrendingUp className="w-5 h-5 text-[#1a1a2e]" strokeWidth={2.5} />
             </div>
             <span className="font-bold text-base text-white">
-              Wall Street <span className="text-[#f0b429]">AI</span>
+              Wall Street <span className="text-[#4F8AFF]">AI</span>
             </span>
           </Link>
         ) : (

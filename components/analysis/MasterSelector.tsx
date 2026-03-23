@@ -56,17 +56,17 @@ export function MasterSelector({
             className={cn(
               "relative flex flex-col items-center gap-2 p-4 rounded-xl border transition-all",
               isSelected
-                ? "border-[#f0b429] bg-[#f0b429]/10"
+                ? "border-[#4F8AFF] bg-[#4F8AFF]/10"
                 : "border-white/10 bg-[#16213e]/80 hover:border-white/30",
               isLocked && "opacity-50 cursor-not-allowed"
             )}
           >
             {isLocked && (
               <div className="absolute top-2 right-2">
-                <Lock className="w-3.5 h-3.5 text-[#f0b429]" />
+                <Lock className="w-3.5 h-3.5 text-[#4F8AFF]" />
               </div>
             )}
-            <div className="relative w-12 h-12 rounded-full overflow-hidden bg-[#f0b429]/20 flex items-center justify-center">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden bg-[#4F8AFF]/20 flex items-center justify-center">
               {master.photoUrl ? (
                 <Image
                   src={master.photoUrl}
@@ -85,13 +85,13 @@ export function MasterSelector({
                 {master.name}
               </p>
               {master.isPremium && (
-                <span className="text-[9px] text-[#f0b429] font-medium">
+                <span className="text-[9px] text-[#4F8AFF] font-medium">
                   PREMIUM
                 </span>
               )}
             </div>
             {isSelected && (
-              <div className="absolute inset-0 rounded-xl border-2 border-[#f0b429] pointer-events-none" />
+              <div className="absolute inset-0 rounded-xl border-2 border-[#4F8AFF] pointer-events-none" />
             )}
           </button>
         );

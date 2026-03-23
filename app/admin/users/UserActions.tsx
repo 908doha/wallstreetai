@@ -59,7 +59,7 @@ export function UserActions({ userId, currentRole }: UserActionsProps) {
           <SelectItem value="admin" className="text-xs">관리자</SelectItem>
         </SelectContent>
       </Select>
-      {isUpdating && <Loader2 className="w-4 h-4 animate-spin text-[#f0b429]" />}
+      {isUpdating && <Loader2 className="w-4 h-4 animate-spin text-[#4F8AFF]" />}
     </div>
   );
 }

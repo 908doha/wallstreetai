@@ -218,7 +218,7 @@ export default function PromptsPage() {
                 onClick={() => setSelectedMasterId(m.id)}
                 className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                   selectedMasterId === m.id
-                    ? "bg-[#f0b429] text-[#1a1a2e] font-semibold"
+                    ? "bg-[#4F8AFF] text-[#1a1a2e] font-semibold"
                     : "bg-[#16213e] text-gray-400 border border-white/10 hover:text-white"
                 }`}
               >

@@ -12,7 +12,7 @@ export default function PaymentsPage() {
       <Card className="bg-[#16213e] border-white/10">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-[#f0b429]" />
+            <CreditCard className="w-5 h-5 text-[#4F8AFF]" />
             결제 기능
           </CardTitle>
         </CardHeader>

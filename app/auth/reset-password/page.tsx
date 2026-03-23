@@ -42,7 +42,7 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen bg-[#0f0f23] flex items-center justify-center p-4">
       <div className="w-full max-w-sm mx-auto space-y-6">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-[#f0b429] rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-[#4F8AFF] rounded-2xl mb-4">
             <TrendingUp className="w-8 h-8 text-[#1a1a2e]" strokeWidth={2.5} />
           </div>
           <h1 className="text-2xl font-bold text-white">비밀번호 재설정</h1>

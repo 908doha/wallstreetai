@@ -36,7 +36,7 @@ export default async function AdminMastersPage() {
           <Card key={master.id} className="bg-[#16213e]/80 border-white/10">
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-[#f0b429]/20 rounded-full flex items-center justify-center flex-shrink-0 border border-[#f0b429]/30 text-xl font-bold text-[#f0b429]">
+                <div className="w-12 h-12 bg-[#4F8AFF]/20 rounded-full flex items-center justify-center flex-shrink-0 border border-[#4F8AFF]/30 text-xl font-bold text-[#4F8AFF]">
                   {master.name.charAt(0)}
                 </div>
                 <div className="flex-1">

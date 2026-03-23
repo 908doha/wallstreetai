@@ -58,7 +58,7 @@ export default async function UsersPage() {
                     <td className="py-3 pr-4">
                       <div className="flex items-center gap-3">
                         <Avatar className="w-8 h-8">
-                          <AvatarFallback className="bg-[#f0b429]/20 text-[#f0b429] text-xs">
+                          <AvatarFallback className="bg-[#4F8AFF]/20 text-[#4F8AFF] text-xs">
                             {user.name ? getInitials(user.name) : "?"}
                           </AvatarFallback>
                         </Avatar>

@@ -82,7 +82,7 @@ export function AccessControlForm({ plan, config }: AccessControlFormProps) {
             onClick={() => setMasterAccess("BASIC")}
             className={`px-3 py-1 rounded text-xs transition-colors ${
               masterAccess === "BASIC"
-                ? "bg-[#f0b429] text-[#1a1a2e] font-semibold"
+                ? "bg-[#4F8AFF] text-[#1a1a2e] font-semibold"
                 : "bg-[#0f0f23] text-gray-400 border border-white/10"
             }`}
           >
@@ -93,7 +93,7 @@ export function AccessControlForm({ plan, config }: AccessControlFormProps) {
             onClick={() => setMasterAccess("ALL")}
             className={`px-3 py-1 rounded text-xs transition-colors ${
               masterAccess === "ALL"
-                ? "bg-[#f0b429] text-[#1a1a2e] font-semibold"
+                ? "bg-[#4F8AFF] text-[#1a1a2e] font-semibold"
                 : "bg-[#0f0f23] text-gray-400 border border-white/10"
             }`}
           >

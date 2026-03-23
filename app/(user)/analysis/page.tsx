@@ -75,8 +75,8 @@ export default function AnalysisPage() {
               selectedTicker={selectedStock?.ticker}
             />
             {selectedStock && (
-              <div className="mt-2 p-2 bg-[#f0b429]/10 rounded-lg border border-[#f0b429]/20">
-                <p className="text-xs text-[#f0b429] font-medium">
+              <div className="mt-2 p-2 bg-[#4F8AFF]/10 rounded-lg border border-[#4F8AFF]/20">
+                <p className="text-xs text-[#4F8AFF] font-medium">
                   선택됨: {selectedStock.ticker} - {selectedStock.name}
                 </p>
               </div>
@@ -95,8 +95,8 @@ export default function AnalysisPage() {
               selectedMasterId={selectedMaster?.id}
             />
             {selectedMaster && (
-              <div className="mt-3 p-2 bg-[#f0b429]/10 rounded-lg border border-[#f0b429]/20">
-                <p className="text-xs text-[#f0b429] font-medium">
+              <div className="mt-3 p-2 bg-[#4F8AFF]/10 rounded-lg border border-[#4F8AFF]/20">
+                <p className="text-xs text-[#4F8AFF] font-medium">
                   선택됨: {selectedMaster.name}
                 </p>
               </div>

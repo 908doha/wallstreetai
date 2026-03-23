@@ -105,8 +105,8 @@ export function StockSearch({ onSelect, selectedTicker }: StockSearchProps) {
                 onClick={() => handleSelect(result)}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-left"
               >
-                <div className="flex items-center justify-center w-8 h-8 bg-[#f0b429]/20 rounded-lg flex-shrink-0">
-                  <TrendingUp className="w-4 h-4 text-[#f0b429]" />
+                <div className="flex items-center justify-center w-8 h-8 bg-[#4F8AFF]/20 rounded-lg flex-shrink-0">
+                  <TrendingUp className="w-4 h-4 text-[#4F8AFF]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">

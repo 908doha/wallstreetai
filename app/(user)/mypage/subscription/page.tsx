@@ -36,8 +36,8 @@ export default async function SubscriptionPage() {
         <Card className="bg-[#16213e]/80 border-white/10">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#f0b429]/20 rounded-xl flex items-center justify-center">
-                <Crown className="w-5 h-5 text-[#f0b429]" />
+              <div className="w-10 h-10 bg-[#4F8AFF]/20 rounded-xl flex items-center justify-center">
+                <Crown className="w-5 h-5 text-[#4F8AFF]" />
               </div>
               <div>
                 <p className="text-xs text-gray-400">현재 플랜</p>
@@ -45,7 +45,7 @@ export default async function SubscriptionPage() {
                   {currentPlan?.name || "무료"}
                 </p>
               </div>
-              <Badge variant="outline" className="ml-auto border-[#f0b429]/50 text-[#f0b429] text-xs">
+              <Badge variant="outline" className="ml-auto border-[#4F8AFF]/50 text-[#4F8AFF] text-xs">
                 이용중
               </Badge>
             </div>
@@ -79,7 +79,7 @@ export default async function SubscriptionPage() {
               <CardContent className="py-3 px-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-semibold text-white">{plan.name}</span>
-                  <span className="text-xs text-[#f0b429] font-medium">{plan.price}/월</span>
+                  <span className="text-xs text-[#4F8AFF] font-medium">{plan.price}/월</span>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {plan.features.map((f) => (

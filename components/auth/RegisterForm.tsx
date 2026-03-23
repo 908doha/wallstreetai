@@ -69,7 +69,7 @@ export function RegisterForm() {
   return (
     <div className="w-full max-w-sm mx-auto space-y-6">
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-14 h-14 bg-[#f0b429] rounded-2xl mb-4">
+        <div className="inline-flex items-center justify-center w-14 h-14 bg-[#4F8AFF] rounded-2xl mb-4">
           <TrendingUp className="w-8 h-8 text-[#1a1a2e]" strokeWidth={2.5} />
         </div>
         <h1 className="text-2xl font-bold text-white">회원가입</h1>
@@ -153,7 +153,7 @@ export function RegisterForm() {
 
       <p className="text-center text-sm text-gray-400">
         이미 계정이 있으신가요?{" "}
-        <Link href="/auth/login" className="text-[#f0b429] hover:underline font-medium">
+        <Link href="/auth/login" className="text-[#4F8AFF] hover:underline font-medium">
           로그인
         </Link>
       </p>

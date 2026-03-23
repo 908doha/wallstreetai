@@ -13,10 +13,10 @@ interface MasterCardProps {
 export function MasterCard({ master, isLocked = false }: MasterCardProps) {
   return (
     <Link href={`/masters/${master.id}`}>
-      <Card className="bg-[#16213e]/80 border-white/10 hover:border-[#f0b429]/40 transition-all cursor-pointer group">
+      <Card className="bg-[#16213e]/80 border-white/10 hover:border-[#4F8AFF]/40 transition-all cursor-pointer group">
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
-            <div className="relative w-14 h-14 rounded-full overflow-hidden bg-[#f0b429]/20 flex-shrink-0 border border-[#f0b429]/30">
+            <div className="relative w-14 h-14 rounded-full overflow-hidden bg-[#4F8AFF]/20 flex-shrink-0 border border-[#4F8AFF]/30">
               {master.photoUrl ? (
                 <Image
                   src={master.photoUrl}
@@ -25,7 +25,7 @@ export function MasterCard({ master, isLocked = false }: MasterCardProps) {
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-[#f0b429]">
+                <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-[#4F8AFF]">
                   {master.name.charAt(0)}
                 </div>
               )}
@@ -36,9 +36,9 @@ export function MasterCard({ master, isLocked = false }: MasterCardProps) {
                 {master.isPremium && (
                   <div className="flex items-center gap-1">
                     {isLocked ? (
-                      <Lock className="w-3 h-3 text-[#f0b429]" />
+                      <Lock className="w-3 h-3 text-[#4F8AFF]" />
                     ) : null}
-                    <span className="text-[9px] text-[#f0b429] font-bold bg-[#f0b429]/10 px-1.5 py-0.5 rounded-full border border-[#f0b429]/20">
+                    <span className="text-[9px] text-[#4F8AFF] font-bold bg-[#4F8AFF]/10 px-1.5 py-0.5 rounded-full border border-[#4F8AFF]/20">
                       PREMIUM
                     </span>
                   </div>
@@ -58,7 +58,7 @@ export function MasterCard({ master, isLocked = false }: MasterCardProps) {
                 ))}
               </div>
             </div>
-            <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-[#f0b429] transition-colors flex-shrink-0" />
+            <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-[#4F8AFF] transition-colors flex-shrink-0" />
           </div>
         </CardContent>
       </Card>

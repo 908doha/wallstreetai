@@ -19,7 +19,7 @@ export function AnalysisResult({ analysis, showShare = true }: AnalysisResultPro
     <div className="space-y-4 animate-fade-in">
       {/* Header Card */}
       <Card className="bg-[#16213e]/80 border-white/10 overflow-hidden">
-        <div className="h-1 bg-gradient-to-r from-[#f0b429] to-amber-600" />
+        <div className="h-1 bg-gradient-to-r from-[#4F8AFF] to-amber-600" />
         <CardContent className="pt-5 pb-5">
           <div className="flex items-start justify-between mb-4">
             <div>
@@ -42,12 +42,12 @@ export function AnalysisResult({ analysis, showShare = true }: AnalysisResultPro
 
           {/* Master info */}
           <div className="flex items-center gap-3 p-3 bg-[#0f0f23]/60 rounded-lg border border-white/5">
-            <Avatar className="w-10 h-10 border border-[#f0b429]/30">
+            <Avatar className="w-10 h-10 border border-[#4F8AFF]/30">
               <AvatarImage
                 src={analysis.master.photoUrl || ""}
                 alt={analysis.master.name}
               />
-              <AvatarFallback className="bg-[#f0b429]/20 text-[#f0b429] text-sm font-bold">
+              <AvatarFallback className="bg-[#4F8AFF]/20 text-[#4F8AFF] text-sm font-bold">
                 {analysis.master.name.charAt(0)}
               </AvatarFallback>
             </Avatar>
@@ -73,7 +73,7 @@ export function AnalysisResult({ analysis, showShare = true }: AnalysisResultPro
       <Card className="bg-[#16213e]/80 border-white/10">
         <CardContent className="pt-5">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-1 h-5 bg-[#f0b429] rounded-full" />
+            <div className="w-1 h-5 bg-[#4F8AFF] rounded-full" />
             <h3 className="text-sm font-semibold text-gray-300">
               {analysis.master.name}의 분석
             </h3>

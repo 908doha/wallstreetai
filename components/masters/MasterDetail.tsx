@@ -13,10 +13,10 @@ export function MasterDetail({ master }: MasterDetailProps) {
     <div className="space-y-4">
       {/* Profile card */}
       <Card className="bg-[#16213e]/80 border-white/10 overflow-hidden">
-        <div className="h-1 bg-gradient-to-r from-[#f0b429] to-amber-600" />
+        <div className="h-1 bg-gradient-to-r from-[#4F8AFF] to-amber-600" />
         <CardContent className="pt-6 pb-6">
           <div className="flex flex-col items-center text-center">
-            <div className="relative w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-[#f0b429]/50">
+            <div className="relative w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-[#4F8AFF]/50">
               {master.photoUrl ? (
                 <Image
                   src={master.photoUrl}
@@ -25,7 +25,7 @@ export function MasterDetail({ master }: MasterDetailProps) {
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-[#f0b429]/20 flex items-center justify-center text-4xl font-bold text-[#f0b429]">
+                <div className="w-full h-full bg-[#4F8AFF]/20 flex items-center justify-center text-4xl font-bold text-[#4F8AFF]">
                   {master.name.charAt(0)}
                 </div>
               )}
@@ -69,7 +69,7 @@ export function MasterDetail({ master }: MasterDetailProps) {
                 key={i}
                 className="flex gap-3 p-3 bg-[#0f0f23]/60 rounded-lg border border-white/5"
               >
-                <Quote className="w-4 h-4 text-[#f0b429] flex-shrink-0 mt-0.5" />
+                <Quote className="w-4 h-4 text-[#4F8AFF] flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-gray-300 italic leading-relaxed">
                   {quote}
                 </p>
@@ -93,7 +93,7 @@ export function MasterDetail({ master }: MasterDetailProps) {
                 <Badge
                   key={stock}
                   variant="secondary"
-                  className="text-xs bg-[#f0b429]/10 text-[#f0b429] border border-[#f0b429]/20"
+                  className="text-xs bg-[#4F8AFF]/10 text-[#4F8AFF] border border-[#4F8AFF]/20"
                 >
                   {stock}
                 </Badge>

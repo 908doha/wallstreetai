@@ -80,8 +80,8 @@ export default async function AdminDashboard() {
       value: data.topTickers[0]?.ticker || "-",
       sub: data.topTickers[0] ? `${data.topTickers[0].count}회 분석` : "",
       icon: TrendingUp,
-      color: "text-[#f0b429]",
-      bg: "bg-[#f0b429]/20",
+      color: "text-[#4F8AFF]",
+      bg: "bg-[#4F8AFF]/20",
     },
   ];
 
@@ -129,7 +129,7 @@ export default async function AdminDashboard() {
                 </span>
                 <div className="flex items-center gap-2">
                   <div
-                    className="h-2 bg-[#f0b429] rounded-full"
+                    className="h-2 bg-[#4F8AFF] rounded-full"
                     style={{
                       width: `${Math.max(20, (item.count / (data.topTickers[0]?.count || 1)) * 100)}px`,
                     }}
@@ -182,7 +182,7 @@ export default async function AdminDashboard() {
                     <td className="py-2.5 pr-4 text-gray-400 text-xs">
                       {analysis.user?.name || analysis.user?.email || "게스트"}
                     </td>
-                    <td className="py-2.5 text-[#f0b429] font-semibold">
+                    <td className="py-2.5 text-[#4F8AFF] font-semibold">
                       {analysis.score}
                     </td>
                   </tr>
