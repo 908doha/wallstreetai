@@ -9,7 +9,7 @@ import { PopularTicker } from "@/components/home/PopularTicker";
 import { BannerDisplay } from "@/components/home/BannerDisplay";
 import { HomeMasterSection } from "@/components/home/HomeMasterSection";
 import { RecommendationBadge } from "@/components/analysis/RecommendationBadge";
-import { TrendingUp, BarChart2, Star, ChevronRight, Zap } from "lucide-react";
+import { TrendingUp, Star, ChevronRight } from "lucide-react";
 import { formatDateTime, truncate } from "@/lib/utils";
 
 async function getHomeData() {
@@ -98,35 +98,6 @@ export default async function HomePage() {
             </Link>
           </div>
           <HomeMasterSection masters={masters} />
-        </div>
-
-        {/* ── Hero ─────────────────────────────────────── */}
-        <div className="relative glass-hero rounded-3xl p-6 overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#4F8AFF]/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full glass-gold text-[11px] font-semibold text-[#4F8AFF] mb-4">
-              <Zap className="w-3 h-3" strokeWidth={2.5} />
-              AI 투자 분석
-            </span>
-
-            <h2 className="text-[22px] font-bold text-white leading-snug mb-2">
-              투자 거장의 눈으로<br />
-              <span className="text-gradient-gold">주식을 분석</span>하세요
-            </h2>
-            <p className="text-[13px] text-white/55 leading-relaxed mb-5">
-              워런 버핏, 피터 린치 등 월스트리트 전설들의<br />
-              투자 철학으로 AI가 종목을 분석합니다
-            </p>
-
-            <Link href="/analysis">
-              <button className="inline-flex items-center gap-2 h-11 px-5 rounded-2xl bg-[#4F8AFF] text-white text-[14px] font-bold transition-opacity hover:opacity-90 active:opacity-75">
-                <BarChart2 className="w-4 h-4" strokeWidth={2.5} />
-                지금 분석하기
-              </button>
-            </Link>
-          </div>
         </div>
 
         {/* ── Sign-up prompt ───────────────────────────── */}
