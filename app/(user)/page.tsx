@@ -7,7 +7,7 @@ import { TopNav } from "@/components/layout/TopNav";
 import { Footer } from "@/components/layout/Footer";
 import { PopularTicker } from "@/components/home/PopularTicker";
 import { BannerDisplay } from "@/components/home/BannerDisplay";
-import { MasterCarousel } from "@/components/home/MasterCarousel";
+import { HomeMasterSection } from "@/components/home/HomeMasterSection";
 import { RecommendationBadge } from "@/components/analysis/RecommendationBadge";
 import { TrendingUp, BarChart2, Star, ChevronRight, Zap } from "lucide-react";
 import { formatDateTime, truncate } from "@/lib/utils";
@@ -84,6 +84,22 @@ export default async function HomePage() {
         {/* ── Banner (CMS) ─────────────────────────────── */}
         <BannerDisplay />
 
+        {/* ── Masters + 주식 입력 ───────────────────────── */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[13px] font-semibold text-white/90 uppercase tracking-widest">
+              투자 마스터
+            </h2>
+            <Link
+              href="/masters"
+              className="text-[12px] text-[#4F8AFF]/80 flex items-center gap-0.5 hover:text-[#4F8AFF] transition-colors"
+            >
+              전체보기 <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          <HomeMasterSection masters={masters} />
+        </div>
+
         {/* ── Hero ─────────────────────────────────────── */}
         <div className="relative glass-hero rounded-3xl p-6 overflow-hidden">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#4F8AFF]/15 rounded-full blur-3xl pointer-events-none" />
@@ -112,24 +128,6 @@ export default async function HomePage() {
             </Link>
           </div>
         </div>
-
-        {/* ── Masters ──────────────────────────────────── */}
-        <section>
-          <div className="flex items-center justify-between mb-4 px-0">
-            <h2 className="text-[13px] font-semibold text-white/90 uppercase tracking-widest">
-              투자 마스터
-            </h2>
-            <Link
-              href="/masters"
-              className="text-[12px] text-[#4F8AFF]/80 flex items-center gap-0.5 hover:text-[#4F8AFF] transition-colors"
-            >
-              전체보기 <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="-mx-4">
-            <MasterCarousel masters={masters} />
-          </div>
-        </section>
 
         {/* ── Sign-up prompt ───────────────────────────── */}
         {!session?.user && (

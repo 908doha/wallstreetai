@@ -17,6 +17,7 @@ interface Master {
 
 interface MasterCarouselProps {
   masters: Master[];
+  onMasterChange?: (master: Master) => void;
 }
 
 const CARD_GRADIENTS = [
@@ -27,9 +28,14 @@ const CARD_GRADIENTS = [
   ["#1a3a4a", "#0891b2"],
 ];
 
-export function MasterCarousel({ masters }: MasterCarouselProps) {
+export function MasterCarousel({ masters, onMasterChange }: MasterCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (masters.length > 0) onMasterChange?.(masters[0]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [masters]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -38,12 +44,14 @@ export function MasterCarousel({ masters }: MasterCarouselProps) {
     const handleScroll = () => {
       const cardWidth = el.scrollWidth / masters.length;
       const idx = Math.round(el.scrollLeft / cardWidth);
-      setActiveIndex(Math.min(idx, masters.length - 1));
+      const newIndex = Math.min(idx, masters.length - 1);
+      setActiveIndex(newIndex);
+      onMasterChange?.(masters[newIndex]);
     };
 
     el.addEventListener("scroll", handleScroll, { passive: true });
     return () => el.removeEventListener("scroll", handleScroll);
-  }, [masters.length]);
+  }, [masters, onMasterChange]);
 
   if (masters.length === 0) return null;
 

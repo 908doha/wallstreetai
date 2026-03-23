@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { TopNav } from "@/components/layout/TopNav";
 import { StockSearch } from "@/components/analysis/StockSearch";
 import { MasterSelector } from "@/components/analysis/MasterSelector";
@@ -13,11 +14,34 @@ import { BarChart2, Loader2 } from "lucide-react";
 import type { StockSearchResult, MasterData, AnalysisResult as AnalysisResultType } from "@/types";
 
 export default function AnalysisPage() {
-  const [selectedStock, setSelectedStock] = useState<StockSearchResult | null>(null);
+  const searchParams = useSearchParams();
+  const presetMasterId = searchParams.get("masterId");
+  const presetTicker = searchParams.get("ticker");
+  const presetCompany = searchParams.get("company");
+
+  const [selectedStock, setSelectedStock] = useState<StockSearchResult | null>(
+    presetTicker
+      ? { ticker: presetTicker, name: presetCompany || presetTicker, exchange: "", type: "Equity" }
+      : null
+  );
   const [selectedMaster, setSelectedMaster] = useState<MasterData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResultType | null>(null);
   const { toast } = useToast();
+
+  // 마스터 자동 선택 (URL에서 전달된 경우)
+  useEffect(() => {
+    if (!presetMasterId) return;
+    fetch("/api/masters")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success) {
+          const found = data.data.find((m: MasterData) => m.id === presetMasterId);
+          if (found) setSelectedMaster(found);
+        }
+      })
+      .catch(() => {});
+  }, [presetMasterId]);
 
   const canAnalyze = selectedStock && selectedMaster && !isLoading;
 
