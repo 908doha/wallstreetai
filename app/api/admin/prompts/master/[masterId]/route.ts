@@ -4,13 +4,14 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { masterId: string } }
+  { params }: { params: Promise<{ masterId: string }> }
 ) {
   try {
+    const { masterId } = await params;
     await requireAdmin();
 
     const prompts = await prisma.masterPrompt.findMany({
-      where: { masterId: params.masterId },
+      where: { masterId },
       orderBy: { version: "desc" },
     });
 
@@ -25,9 +26,10 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { masterId: string } }
+  { params }: { params: Promise<{ masterId: string }> }
 ) {
   try {
+    const { masterId } = await params;
     await requireAdmin();
     const { content } = await req.json();
 
@@ -35,27 +37,19 @@ export async function POST(
       return NextResponse.json({ success: false, error: "내용을 입력하세요" }, { status: 400 });
     }
 
-    // Get next version
     const lastPrompt = await prisma.masterPrompt.findFirst({
-      where: { masterId: params.masterId },
+      where: { masterId },
       orderBy: { version: "desc" },
     });
     const nextVersion = (lastPrompt?.version || 0) + 1;
 
-    // Deactivate existing
     await prisma.masterPrompt.updateMany({
-      where: { masterId: params.masterId },
+      where: { masterId },
       data: { isActive: false },
     });
 
-    // Create new
     const prompt = await prisma.masterPrompt.create({
-      data: {
-        masterId: params.masterId,
-        content,
-        version: nextVersion,
-        isActive: true,
-      },
+      data: { masterId, content, version: nextVersion, isActive: true },
     });
 
     return NextResponse.json({ success: true, data: prompt });

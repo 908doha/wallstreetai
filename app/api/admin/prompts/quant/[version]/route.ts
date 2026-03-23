@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
-// POST to rollback to this version
 export async function POST(
   req: NextRequest,
-  { params }: { params: { version: string } }
+  { params }: { params: Promise<{ version: string }> }
 ) {
   try {
+    const { version: versionStr } = await params;
     await requireAdmin();
 
-    const version = parseInt(params.version);
+    const version = parseInt(versionStr);
     if (isNaN(version)) {
       return NextResponse.json({ success: false, error: "올바르지 않은 버전" }, { status: 400 });
     }
@@ -23,12 +23,8 @@ export async function POST(
       );
     }
 
-    // Deactivate all, activate target
     await prisma.quantPrompt.updateMany({ data: { isActive: false } });
-    await prisma.quantPrompt.update({
-      where: { version },
-      data: { isActive: true },
-    });
+    await prisma.quantPrompt.update({ where: { version }, data: { isActive: true } });
 
     return NextResponse.json({ success: true, data: target });
   } catch (error) {
