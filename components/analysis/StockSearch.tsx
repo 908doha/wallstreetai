@@ -63,7 +63,7 @@ export function StockSearch({ onSelect, selectedTicker }: StockSearchProps) {
 
   const handleSelect = (result: StockSearchResult) => {
     setSelected(result);
-    setQuery(`${result.ticker} - ${result.name}`);
+    setQuery(`${result.name} (${result.ticker})`);
     setIsOpen(false);
     onSelect(result);
   };
@@ -110,14 +110,11 @@ export function StockSearch({ onSelect, selectedTicker }: StockSearchProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-white">
-                      {result.ticker}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {result.exchange}
+                    <span className="font-semibold text-sm text-white truncate">
+                      {result.name}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-400 truncate">{result.name}</p>
+                  <p className="text-xs text-gray-400">{result.ticker} · {result.exchange}</p>
                 </div>
               </button>
             ))}

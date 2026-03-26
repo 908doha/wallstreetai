@@ -137,12 +137,12 @@ export function AnalysisDetailPage({ analysis, isPro }: Props) {
       <div className="px-4 pb-6 flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-[28px] font-black text-white">{analysis.ticker}</h1>
+            <h1 className="text-[28px] font-black text-white">{analysis.companyName}</h1>
             <span className={`text-[12px] font-bold px-2.5 py-1 rounded-full ${rec.bg} ${rec.text}`}>
               {rec.label}
             </span>
           </div>
-          <p className="text-[13px] text-white/40">{analysis.companyName}</p>
+          <p className="text-[13px] text-white/40">{analysis.ticker}</p>
           <div className="flex items-center gap-2 mt-2">
             {analysis.master.photoUrl ? (
               <div className="w-5 h-5 rounded-full overflow-hidden">
