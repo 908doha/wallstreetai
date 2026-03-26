@@ -185,18 +185,14 @@ html.light .glass-gold {
   border: 1px solid rgba(79, 138, 255, 0.22);
 }
 
-/* Custom scrollbar */
+/* Hide scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
+  display: none;
 }
 
-::-webkit-scrollbar-track {
-  background: #0a0a1a;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(240, 180, 41, 0.4);
-  border-radius: 2px;
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 /* ── Animations ──────────────────────────────────────── */

@@ -1,33 +1,20 @@
+import Anthropic from "@anthropic-ai/sdk";
 import type { ClaudeAnalysisResponse } from "@/types";
 
-async function callClaude(system: string, user: string): Promise<string> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
 
-  const body = JSON.stringify({
+async function callClaude(system: string, user: string): Promise<string> {
+  const message = await anthropic.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 2000,
     system,
     messages: [{ role: "user", content: user }],
   });
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body,
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Anthropic API error ${res.status}: ${err}`);
-  }
-
-  const data = await res.json();
-  return data.content?.[0]?.text ?? "";
+  const block = message.content[0];
+  return block.type === "text" ? block.text : "";
 }
 
 export async function runAnalysis({
