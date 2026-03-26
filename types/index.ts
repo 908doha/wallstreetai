@@ -44,6 +44,96 @@ export interface QuantMetrics {
   beta: number | null;
 }
 
+// Rich Analysis Report (16-part framework)
+export interface FinancialTableRow {
+  label: string;
+  values: string[]; // e.g. ["$1.3B", "$1.43B", "$1.61B", "+13%"]
+  highlight?: boolean;
+  isPositive?: boolean | null; // null = neutral
+}
+
+export interface RatioAnalysisRow {
+  category: string;
+  metric: string;
+  currentValue: string;
+  benchmark: string;
+  verdict: "excellent" | "good" | "fair" | "warning" | "poor";
+}
+
+export interface MarketShareItem {
+  company: string;
+  share: number;
+}
+
+export interface CompetitorRow {
+  company: string;
+  marketShare: string;
+  strength: string;
+  threatLevel: "high" | "medium" | "low";
+}
+
+export interface PortersForce {
+  factor: string;
+  level: "low" | "medium" | "high";
+  detail: string;
+}
+
+export interface RichAnalysisReport {
+  // PART I: Financial Analysis
+  companyOverview: {
+    name: string;
+    ticker: string;
+    exchange: string;
+    sector: string;
+    description: string;
+    keyStats: { label: string; value: string; highlight?: boolean }[];
+  };
+  financialTable: {
+    periods: string[]; // e.g. ["FY22","FY23","FY24","FY25","YoY"]
+    rows: FinancialTableRow[];
+    summary: string;
+  };
+  ratioAnalysis: RatioAnalysisRow[];
+  financialGrade: string;
+  financialSummary: string;
+
+  // PART II: Industry Analysis
+  industryAnalysis: {
+    marketPositionSummary: string;
+    marketShareData: MarketShareItem[];
+    competitorTable: CompetitorRow[];
+    portersFiveForces: PortersForce[];
+    trendSummary: string;
+  };
+
+  // SWOT
+  swot: {
+    strengths: string[];
+    weaknesses: string[];
+    opportunities: string[];
+    threats: string[];
+  };
+
+  // Master Comment
+  masterComment: string;
+
+  // Investment Strategy (PART XVI)
+  investmentStrategy: {
+    shortTerm: string;
+    midTerm: string;
+    longTerm: string;
+    keyRisks: string[];
+    targetPrice: string;
+    riskLevel: "high" | "medium" | "low";
+  };
+
+  recommendation: "BUY" | "HOLD" | "SELL";
+  score: number;
+  quantMetrics: Partial<QuantMetrics>;
+}
+
+export interface ClaudeRichAnalysisResponse extends RichAnalysisReport {}
+
 export interface AnalysisResult {
   id: string;
   userId: string | null;
@@ -57,6 +147,7 @@ export interface AnalysisResult {
   shareToken: string;
   createdAt: Date;
   master: MasterData;
+  reportData?: RichAnalysisReport | null;
 }
 
 export interface SubscriptionWithPlan {

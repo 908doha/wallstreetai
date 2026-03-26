@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import { DEFAULT_QUANT_PROMPT, DEFAULT_MASTER_PROMPTS } from "../lib/claude";
+import { DEFAULT_MASTER_PROMPTS } from "../lib/claude";
+
+const DEFAULT_QUANT_PROMPT = `당신은 전문 주식 분석가입니다. 다음 퀀트 분석 기준을 적용하여 주식을 평가하세요.`;
 
 const prisma = new PrismaClient();
 

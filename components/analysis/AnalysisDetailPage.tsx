@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Lock } from "lucide-react";
-import type { AnalysisResult, QuantMetrics } from "@/types";
+import type { AnalysisResult, QuantMetrics, RichAnalysisReport } from "@/types";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 interface Props {
   analysis: AnalysisResult & { master: any };
@@ -11,19 +12,40 @@ interface Props {
 }
 
 const REC_COLOR: Record<string, { bg: string; text: string; label: string }> = {
-  BUY:      { bg: "bg-emerald-500/15", text: "text-emerald-400", label: "매수" },
-  HOLD:     { bg: "bg-yellow-500/15",  text: "text-yellow-400",  label: "보유" },
-  SELL:     { bg: "bg-red-500/15",     text: "text-red-400",     label: "매도" },
+  BUY:  { bg: "bg-emerald-500/15", text: "text-emerald-400", label: "매수" },
+  HOLD: { bg: "bg-yellow-500/15",  text: "text-yellow-400",  label: "보유" },
+  SELL: { bg: "bg-red-500/15",     text: "text-red-400",     label: "매도" },
   STRONG_BUY:  { bg: "bg-emerald-500/20", text: "text-emerald-300", label: "강력매수" },
   STRONG_SELL: { bg: "bg-red-500/20",     text: "text-red-300",     label: "강력매도" },
 };
+
+const VERDICT_STYLE: Record<string, { text: string; bg: string; label: string }> = {
+  excellent: { text: "text-emerald-400", bg: "bg-emerald-400/10", label: "탁월" },
+  good:      { text: "text-blue-400",    bg: "bg-blue-400/10",    label: "양호" },
+  fair:      { text: "text-yellow-400",  bg: "bg-yellow-400/10",  label: "보통" },
+  warning:   { text: "text-orange-400",  bg: "bg-orange-400/10",  label: "주의" },
+  poor:      { text: "text-red-400",     bg: "bg-red-400/10",     label: "불량" },
+};
+
+const PORTER_LEVEL_STYLE: Record<string, { icon: string; text: string }> = {
+  low:    { icon: "✅", text: "text-emerald-400" },
+  medium: { icon: "⚠️", text: "text-yellow-400" },
+  high:   { icon: "🔴", text: "text-red-400" },
+};
+
+const THREAT_LEVEL: Record<string, { icon: string; label: string }> = {
+  high:   { icon: "🔴", label: "높음" },
+  medium: { icon: "🟡", label: "중간" },
+  low:    { icon: "🟢", label: "낮음" },
+};
+
+const PIE_COLORS = ["#4F8AFF", "#34d399", "#f59e0b", "#f87171", "#a78bfa", "#94a3b8"];
 
 function ScoreRing({ score }: { score: number }) {
   const r = 36;
   const circ = 2 * Math.PI * r;
   const fill = (score / 100) * circ;
-  const color =
-    score >= 70 ? "#34d399" : score >= 50 ? "#fbbf24" : "#f87171";
+  const color = score >= 70 ? "#34d399" : score >= 50 ? "#fbbf24" : "#f87171";
 
   return (
     <div className="relative w-24 h-24 flex items-center justify-center">
@@ -59,10 +81,7 @@ function MetricBar({ label, value, max, unit, color }: {
         </span>
       </div>
       <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-        <div
-          className="h-full rounded-full transition-all duration-700"
-          style={{ width: `${pct}%`, background: color }}
-        />
+        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: color }} />
       </div>
     </div>
   );
@@ -73,17 +92,8 @@ function PriceRange({ low, high, current }: { low: number; high: number; current
   return (
     <div className="space-y-2">
       <div className="relative h-2 bg-white/[0.06] rounded-full">
-        <div
-          className="absolute h-full rounded-full"
-          style={{
-            width: `${pct}%`,
-            background: "linear-gradient(90deg, #ef4444, #fbbf24, #34d399)",
-          }}
-        />
-        <div
-          className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg border-2 border-[#0d0d1a]"
-          style={{ left: `calc(${pct}% - 6px)` }}
-        />
+        <div className="absolute h-full rounded-full" style={{ width: `${pct}%`, background: "linear-gradient(90deg, #ef4444, #fbbf24, #34d399)" }} />
+        <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg border-2 border-[#0d0d1a]" style={{ left: `calc(${pct}% - 6px)` }} />
       </div>
       <div className="flex justify-between text-[11px] text-white/40">
         <span>52주 최저 ${low.toFixed(0)}</span>
@@ -119,9 +129,409 @@ function MetricGrid({ metrics }: { metrics: QuantMetrics }) {
   );
 }
 
+// ── Rich Report Sections ──
+
+function SectionHeader({ part, title }: { part: string; title: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <span className="text-[10px] font-bold text-[#4F8AFF]/60 uppercase tracking-widest">{part}</span>
+      <span className="text-[11px] font-bold text-[#4F8AFF] uppercase tracking-wider">{title}</span>
+    </div>
+  );
+}
+
+function CompanyOverviewCard({ report }: { report: RichAnalysisReport }) {
+  const ov = report.companyOverview;
+  return (
+    <div className="bg-white/[0.04] rounded-3xl p-5">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 rounded-2xl bg-[#4F8AFF]/20 flex items-center justify-center text-[20px] font-black text-[#4F8AFF]">
+          {ov.name.charAt(0)}
+        </div>
+        <div>
+          <p className="text-[16px] font-bold text-white">{ov.name}</p>
+          <p className="text-[12px] text-white/40">{ov.ticker} · {ov.exchange}</p>
+          <p className="text-[11px] text-[#4F8AFF]/70 mt-0.5">{ov.sector}</p>
+        </div>
+      </div>
+      <p className="text-[13px] text-white/70 leading-relaxed mb-4">{ov.description}</p>
+      <div className="grid grid-cols-2 gap-2">
+        {ov.keyStats?.map((stat, i) => (
+          <div key={i} className={`rounded-2xl px-3 py-2 ${stat.highlight ? "bg-[#4F8AFF]/10 border border-[#4F8AFF]/20" : "bg-white/[0.03]"}`}>
+            <p className="text-[10px] text-white/40">{stat.label}</p>
+            <p className={`text-[14px] font-bold ${stat.highlight ? "text-[#4F8AFF]" : "text-white"}`}>{stat.value}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FinancialTableSection({ report }: { report: RichAnalysisReport }) {
+  const ft = report.financialTable;
+  if (!ft) return null;
+  return (
+    <div className="bg-white/[0.04] rounded-3xl p-5">
+      <p className="text-[12px] font-bold text-white/60 mb-3">재무 실적 추이</p>
+      <div className="overflow-x-auto -mx-1">
+        <table className="w-full text-[12px]">
+          <thead>
+            <tr>
+              <th className="text-left text-white/40 font-medium pb-2 pr-3 min-w-[100px]">항목</th>
+              {ft.periods?.map((p, i) => (
+                <th key={i} className={`text-right pb-2 px-2 font-medium ${p === "YoY" ? "text-[#4F8AFF]" : "text-white/40"}`}>{p}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {ft.rows?.map((row, i) => (
+              <tr key={i} className={row.highlight ? "bg-white/[0.03] rounded" : ""}>
+                <td className={`py-2 pr-3 ${row.highlight ? "text-white font-semibold" : "text-white/70"}`}>{row.label}</td>
+                {row.values?.map((v, j) => {
+                  const isYoy = j === (row.values.length - 1);
+                  const isPos = isYoy && v.startsWith("+");
+                  const isNeg = isYoy && v.startsWith("-");
+                  return (
+                    <td key={j} className={`text-right py-2 px-2 font-mono ${isYoy ? (isPos ? "text-emerald-400 font-bold" : isNeg ? "text-red-400 font-bold" : "text-white/50") : "text-white/80"}`}>
+                      {v}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {ft.summary && (
+        <p className="text-[12px] text-white/50 mt-3 pt-3 border-t border-white/[0.06] leading-relaxed">{ft.summary}</p>
+      )}
+    </div>
+  );
+}
+
+function RatioAnalysisSection({ report }: { report: RichAnalysisReport }) {
+  if (!report.ratioAnalysis?.length) return null;
+  return (
+    <div className="bg-white/[0.04] rounded-3xl p-5">
+      <p className="text-[12px] font-bold text-white/60 mb-3">재무비율 분석</p>
+      <div className="space-y-2">
+        {report.ratioAnalysis.map((row, i) => {
+          const vs = VERDICT_STYLE[row.verdict] ?? VERDICT_STYLE.fair;
+          return (
+            <div key={i} className="flex items-center gap-2 py-1.5 border-b border-white/[0.04] last:border-0">
+              <span className="text-[10px] text-white/30 w-14 shrink-0">{row.category}</span>
+              <span className="text-[12px] text-white/70 flex-1">{row.metric}</span>
+              <span className="text-[12px] font-bold text-white w-16 text-right">{row.currentValue}</span>
+              <span className="text-[10px] text-white/30 w-16 text-right hidden sm:block">{row.benchmark}</span>
+              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${vs.bg} ${vs.text}`}>{vs.label}</span>
+            </div>
+          );
+        })}
+      </div>
+      {report.financialGrade && (
+        <div className="mt-3 pt-3 border-t border-white/[0.06] flex items-center justify-between">
+          <span className="text-[12px] text-white/50">재무 건전성 등급</span>
+          <span className="text-[16px] font-black text-emerald-400">{report.financialGrade}</span>
+        </div>
+      )}
+      {report.financialSummary && (
+        <p className="text-[12px] text-white/50 mt-2 leading-relaxed">{report.financialSummary}</p>
+      )}
+    </div>
+  );
+}
+
+function MarketSharePieChart({ data }: { data: { company: string; share: number }[] }) {
+  if (!data?.length) return null;
+  return (
+    <div className="bg-white/[0.04] rounded-3xl p-5">
+      <p className="text-[12px] font-bold text-white/60 mb-3">시장 점유율</p>
+      <ResponsiveContainer width="100%" height={220}>
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="share"
+            nameKey="company"
+            cx="50%"
+            cy="50%"
+            outerRadius={80}
+            label={({ name, percent }: { name?: string; percent?: number }) => `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`}
+            labelLine={false}
+          >
+            {data.map((_, index) => (
+              <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip
+            contentStyle={{ background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "#fff", fontSize: "12px" }}
+            formatter={(value: unknown) => [`${value ?? 0}%`, "점유율"]}
+          />
+          <Legend
+            iconType="circle"
+            iconSize={8}
+            wrapperStyle={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function PortersSection({ report }: { report: RichAnalysisReport }) {
+  const forces = report.industryAnalysis?.portersFiveForces;
+  if (!forces?.length) return null;
+  return (
+    <div className="bg-white/[0.04] rounded-3xl p-5">
+      <p className="text-[12px] font-bold text-white/60 mb-3">Porter's 5 Forces</p>
+      <div className="space-y-2">
+        {forces.map((f, i) => {
+          const ls = PORTER_LEVEL_STYLE[f.level] ?? PORTER_LEVEL_STYLE.medium;
+          return (
+            <div key={i} className="flex items-start gap-2 py-1.5 border-b border-white/[0.04] last:border-0">
+              <span className="text-[14px] mt-0.5">{ls.icon}</span>
+              <div className="flex-1">
+                <p className={`text-[12px] font-semibold ${ls.text}`}>{f.factor}</p>
+                <p className="text-[11px] text-white/40 mt-0.5">{f.detail}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CompetitorTable({ report }: { report: RichAnalysisReport }) {
+  const competitors = report.industryAnalysis?.competitorTable;
+  if (!competitors?.length) return null;
+  return (
+    <div className="bg-white/[0.04] rounded-3xl p-5">
+      <p className="text-[12px] font-bold text-white/60 mb-3">경쟁사 비교</p>
+      <div className="space-y-2">
+        {competitors.map((c, i) => {
+          const tl = THREAT_LEVEL[c.threatLevel] ?? THREAT_LEVEL.medium;
+          return (
+            <div key={i} className="flex items-center gap-2 py-1.5 border-b border-white/[0.04] last:border-0">
+              <span className="text-[14px]">{tl.icon}</span>
+              <div className="flex-1">
+                <p className="text-[12px] font-semibold text-white">{c.company}</p>
+                <p className="text-[11px] text-white/40">{c.strength}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[11px] text-white/60">{c.marketShare}</p>
+                <p className="text-[10px] text-white/30">{tl.label}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SwotSection({ report }: { report: RichAnalysisReport }) {
+  const swot = report.swot;
+  if (!swot) return null;
+  const quadrants = [
+    { title: "강점 Strengths", items: swot.strengths, bg: "bg-emerald-500/10", border: "border-emerald-500/20", text: "text-emerald-400", dot: "bg-emerald-400" },
+    { title: "약점 Weaknesses", items: swot.weaknesses, bg: "bg-red-500/10", border: "border-red-500/20", text: "text-red-400", dot: "bg-red-400" },
+    { title: "기회 Opportunities", items: swot.opportunities, bg: "bg-blue-500/10", border: "border-blue-500/20", text: "text-blue-400", dot: "bg-blue-400" },
+    { title: "위협 Threats", items: swot.threats, bg: "bg-orange-500/10", border: "border-orange-500/20", text: "text-orange-400", dot: "bg-orange-400" },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      {quadrants.map((q) => (
+        <div key={q.title} className={`rounded-2xl p-4 border ${q.bg} ${q.border}`}>
+          <p className={`text-[10px] font-bold mb-2 ${q.text}`}>{q.title}</p>
+          <ul className="space-y-1.5">
+            {q.items?.map((item, i) => (
+              <li key={i} className="flex items-start gap-1.5">
+                <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${q.dot}`} />
+                <span className="text-[11px] text-white/70 leading-relaxed">{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function InvestmentStrategySection({ report }: { report: RichAnalysisReport }) {
+  const strategy = report.investmentStrategy;
+  if (!strategy) return null;
+  const riskStyle = {
+    high:   { text: "text-red-400",    bg: "bg-red-400/10",    label: "높음" },
+    medium: { text: "text-yellow-400", bg: "bg-yellow-400/10", label: "중간" },
+    low:    { text: "text-emerald-400", bg: "bg-emerald-400/10", label: "낮음" },
+  }[strategy.riskLevel] ?? { text: "text-yellow-400", bg: "bg-yellow-400/10", label: "중간" };
+
+  return (
+    <div className="bg-white/[0.04] rounded-3xl p-5 space-y-4">
+      {/* 목표주가 + 리스크 */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[11px] text-white/40 mb-0.5">목표주가</p>
+          <p className="text-[18px] font-black text-[#4F8AFF]">{strategy.targetPrice}</p>
+        </div>
+        <div className={`px-3 py-1.5 rounded-xl ${riskStyle.bg}`}>
+          <p className="text-[10px] text-white/40 mb-0.5">리스크</p>
+          <p className={`text-[13px] font-bold ${riskStyle.text}`}>{riskStyle.label}</p>
+        </div>
+      </div>
+
+      {/* 단기/중기/장기 */}
+      <div className="space-y-2.5">
+        {[
+          { label: "단기 (1-3개월)", value: strategy.shortTerm, color: "text-yellow-400" },
+          { label: "중기 (3-12개월)", value: strategy.midTerm, color: "text-blue-400" },
+          { label: "장기 (1년+)", value: strategy.longTerm, color: "text-emerald-400" },
+        ].map((item) => (
+          <div key={item.label} className="flex gap-3">
+            <span className={`text-[10px] font-bold w-24 shrink-0 pt-0.5 ${item.color}`}>{item.label}</span>
+            <span className="text-[12px] text-white/70 leading-relaxed">{item.value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* 핵심 리스크 */}
+      {strategy.keyRisks?.length > 0 && (
+        <div className="pt-3 border-t border-white/[0.06]">
+          <p className="text-[11px] font-bold text-white/50 mb-2">핵심 리스크</p>
+          <ul className="space-y-1.5">
+            {strategy.keyRisks.map((risk, i) => (
+              <li key={i} className="flex items-start gap-1.5">
+                <span className="text-red-400 text-[12px] mt-0.5">⚠</span>
+                <span className="text-[12px] text-white/60">{risk}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── RichReportContent: PRO 전용 전체 리포트 ──
+function RichReportContent({ report, master }: { report: RichAnalysisReport; master: any }) {
+  return (
+    <div className="px-4 space-y-6">
+      {/* 회사 개요 */}
+      <section>
+        <SectionHeader part="개요" title="회사 개요" />
+        <CompanyOverviewCard report={report} />
+      </section>
+
+      {/* PART I: 재무 분석 */}
+      <section>
+        <SectionHeader part="PART I" title="재무 보고서 분석" />
+        <div className="space-y-3">
+          <FinancialTableSection report={report} />
+          <RatioAnalysisSection report={report} />
+        </div>
+      </section>
+
+      {/* PART II: 업계 분석 */}
+      <section>
+        <SectionHeader part="PART II" title="업계 상태 분석" />
+        <div className="space-y-3">
+          {report.industryAnalysis?.marketPositionSummary && (
+            <div className="bg-white/[0.04] rounded-3xl p-5">
+              <p className="text-[12px] font-bold text-white/60 mb-2">시장 포지셔닝</p>
+              <p className="text-[13px] text-white/70 leading-relaxed">{report.industryAnalysis.marketPositionSummary}</p>
+            </div>
+          )}
+          {report.industryAnalysis?.marketShareData?.length > 0 && (
+            <MarketSharePieChart data={report.industryAnalysis.marketShareData} />
+          )}
+          <PortersSection report={report} />
+          <CompetitorTable report={report} />
+          {report.industryAnalysis?.trendSummary && (
+            <div className="bg-white/[0.04] rounded-3xl p-5">
+              <p className="text-[12px] font-bold text-white/60 mb-2">업계 동향</p>
+              <p className="text-[13px] text-white/70 leading-relaxed">{report.industryAnalysis.trendSummary}</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* SWOT */}
+      <section>
+        <SectionHeader part="SWOT" title="SWOT 분석" />
+        <SwotSection report={report} />
+      </section>
+
+      {/* 거장의 코멘트 */}
+      <section>
+        <SectionHeader part="거장의 코멘트" title={`${master.name}의 종합 분석`} />
+        <div className="rounded-3xl p-5" style={{ background: "linear-gradient(135deg, #1a2744 0%, #0f1b35 100%)", border: "1px solid rgba(79,138,255,0.2)" }}>
+          <p className="text-[11px] font-semibold text-[#4F8AFF]/80 uppercase tracking-widest mb-3">{master.name}의 한마디</p>
+          <p className="text-[14px] text-white/90 leading-relaxed">{report.masterComment}</p>
+        </div>
+      </section>
+
+      {/* PART XVI: 투자 전략 */}
+      <section>
+        <SectionHeader part="PART XVI" title="투자 전략" />
+        <InvestmentStrategySection report={report} />
+      </section>
+    </div>
+  );
+}
+
+// ── Legacy PRO Content (구버전 분석 fallback) ──
+function LegacyProContent({ analysis }: { analysis: AnalysisResult }) {
+  const m = analysis.quantMetrics as QuantMetrics;
+  return (
+    <div className="px-4 space-y-4">
+      {m.fiftyTwoWeekHigh && m.fiftyTwoWeekLow && m.currentPrice && (
+        <section>
+          <p className="text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-3">현재 주가 위치</p>
+          <div className="bg-white/[0.04] rounded-3xl p-5">
+            <p className="text-[13px] text-white/50 mb-4">52주 가격 범위</p>
+            <PriceRange low={m.fiftyTwoWeekLow} high={m.fiftyTwoWeekHigh} current={m.currentPrice} />
+          </div>
+        </section>
+      )}
+      <section>
+        <p className="text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-3">핵심 지표</p>
+        <MetricGrid metrics={m} />
+      </section>
+      {(m.roe !== null || m.revenueGrowth !== null) && (
+        <section>
+          <p className="text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-3">수익성 분석</p>
+          <div className="bg-white/[0.04] rounded-3xl p-5 space-y-4">
+            <MetricBar label="ROE (자기자본이익률)" value={m.roe} max={50} unit="%" color="#34d399" />
+            <MetricBar label="매출 성장률 (YoY)" value={m.revenueGrowth} max={50} unit="%" color="#4F8AFF" />
+            <MetricBar label="배당수익률" value={m.dividendYield} max={10} unit="%" color="#fbbf24" />
+          </div>
+        </section>
+      )}
+      {(m.beta !== null || m.debtRatio !== null) && (
+        <section>
+          <p className="text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-3">리스크 지표</p>
+          <div className="bg-white/[0.04] rounded-3xl p-5 space-y-4">
+            <MetricBar label="베타 (시장 변동성)" value={m.beta} max={3} unit="" color="#f87171" />
+            <MetricBar label="부채비율 (D/E)" value={m.debtRatio} max={5} unit="" color="#fb923c" />
+          </div>
+        </section>
+      )}
+      {m.marketCap && (
+        <div className="bg-white/[0.04] rounded-3xl px-5 py-4 flex justify-between items-center">
+          <span className="text-[13px] text-white/50">시가총액</span>
+          <span className="text-[15px] font-bold text-white">
+            {m.marketCap >= 1e12 ? `$${(m.marketCap / 1e12).toFixed(2)}T` : m.marketCap >= 1e9 ? `$${(m.marketCap / 1e9).toFixed(1)}B` : `$${(m.marketCap / 1e6).toFixed(0)}M`}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function AnalysisDetailPage({ analysis, isPro }: Props) {
   const rec = REC_COLOR[analysis.recommendation] ?? REC_COLOR.HOLD;
-  const m = analysis.quantMetrics as QuantMetrics;
+  const richReport = analysis.reportData as RichAnalysisReport | null | undefined;
 
   return (
     <div className="flex-1 pb-20">
@@ -133,14 +543,12 @@ export function AnalysisDetailPage({ analysis, isPro }: Props) {
         </Link>
       </div>
 
-      {/* ── 헤더 ── */}
+      {/* 헤더 */}
       <div className="px-4 pb-6 flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-[28px] font-black text-white">{analysis.companyName}</h1>
-            <span className={`text-[12px] font-bold px-2.5 py-1 rounded-full ${rec.bg} ${rec.text}`}>
-              {rec.label}
-            </span>
+            <span className={`text-[12px] font-bold px-2.5 py-1 rounded-full ${rec.bg} ${rec.text}`}>{rec.label}</span>
           </div>
           <p className="text-[13px] text-white/40">{analysis.ticker}</p>
           <div className="flex items-center gap-2 mt-2">
@@ -159,116 +567,66 @@ export function AnalysisDetailPage({ analysis, isPro }: Props) {
         <ScoreRing score={analysis.score} />
       </div>
 
-      {/* ── 거장의 한마디 ── */}
-      <div className="px-4 mb-4">
-        <div className="rounded-3xl p-5" style={{ background: "linear-gradient(135deg, #1a2744 0%, #0f1b35 100%)", border: "1px solid rgba(79,138,255,0.2)" }}>
-          <p className="text-[11px] font-semibold text-[#4F8AFF]/80 uppercase tracking-widest mb-3">
-            {analysis.master.name}의 한마디
-          </p>
-          <p className="text-[15px] text-white/90 leading-relaxed">
-            {analysis.masterComment}
-          </p>
+      {/* 구버전: reportData 없으면 기존 masterComment 표시 */}
+      {!richReport && (
+        <div className="px-4 mb-4">
+          <div className="rounded-3xl p-5" style={{ background: "linear-gradient(135deg, #1a2744 0%, #0f1b35 100%)", border: "1px solid rgba(79,138,255,0.2)" }}>
+            <p className="text-[11px] font-semibold text-[#4F8AFF]/80 uppercase tracking-widest mb-3">{analysis.master.name}의 한마디</p>
+            <p className="text-[15px] text-white/90 leading-relaxed">{analysis.masterComment}</p>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* ── PRO 콘텐츠 ── */}
+      {/* PRO 콘텐츠 */}
       {isPro ? (
-        <div className="px-4 space-y-4">
-          {/* 52주 가격 범위 */}
-          {m.fiftyTwoWeekHigh && m.fiftyTwoWeekLow && m.currentPrice && (
-            <section>
-              <p className="text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-3">현재 주가 위치</p>
-              <div className="bg-white/[0.04] rounded-3xl p-5">
-                <p className="text-[13px] text-white/50 mb-4">52주 가격 범위</p>
-                <PriceRange low={m.fiftyTwoWeekLow} high={m.fiftyTwoWeekHigh} current={m.currentPrice} />
-              </div>
-            </section>
-          )}
-
-          {/* 퀀트 지표 */}
-          <section>
-            <p className="text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-3">핵심 지표</p>
-            <MetricGrid metrics={m} />
-          </section>
-
-          {/* 수익성 바 차트 */}
-          {(m.roe !== null || m.revenueGrowth !== null) && (
-            <section>
-              <p className="text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-3">수익성 분석</p>
-              <div className="bg-white/[0.04] rounded-3xl p-5 space-y-4">
-                <MetricBar label="ROE (자기자본이익률)" value={m.roe} max={50} unit="%" color="#34d399" />
-                <MetricBar label="매출 성장률 (YoY)" value={m.revenueGrowth} max={50} unit="%" color="#4F8AFF" />
-                <MetricBar label="배당수익률" value={m.dividendYield} max={10} unit="%" color="#fbbf24" />
-              </div>
-            </section>
-          )}
-
-          {/* 리스크 지표 */}
-          {(m.beta !== null || m.debtRatio !== null) && (
-            <section>
-              <p className="text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-3">리스크 지표</p>
-              <div className="bg-white/[0.04] rounded-3xl p-5 space-y-4">
-                <MetricBar label="베타 (시장 변동성)" value={m.beta} max={3} unit="" color="#f87171" />
-                <MetricBar label="부채비율 (D/E)" value={m.debtRatio} max={5} unit="" color="#fb923c" />
-              </div>
-            </section>
-          )}
-
-          {/* 시총 */}
-          {m.marketCap && (
-            <div className="bg-white/[0.04] rounded-3xl px-5 py-4 flex justify-between items-center">
-              <span className="text-[13px] text-white/50">시가총액</span>
-              <span className="text-[15px] font-bold text-white">
-                {m.marketCap >= 1e12
-                  ? `$${(m.marketCap / 1e12).toFixed(2)}T`
-                  : m.marketCap >= 1e9
-                  ? `$${(m.marketCap / 1e9).toFixed(1)}B`
-                  : `$${(m.marketCap / 1e6).toFixed(0)}M`}
-              </span>
-            </div>
-          )}
-        </div>
+        richReport
+          ? <RichReportContent report={richReport} master={analysis.master} />
+          : <LegacyProContent analysis={analysis} />
       ) : (
-        /* ── Free 유저: 블러 + 페이월 ── */
-        <div className="relative">
-          {/* 블러된 콘텐츠 미리보기 */}
-          <div className="px-4 space-y-4 blur-sm pointer-events-none select-none" aria-hidden>
-            <div className="grid grid-cols-2 gap-2.5">
-              {["PER", "PBR", "ROE", "EPS", "매출성장", "부채비율", "배당수익률", "베타"].map((l) => (
-                <div key={l} className="bg-white/[0.04] rounded-2xl px-4 py-3">
-                  <p className="text-[11px] text-white/40 mb-1">{l}</p>
-                  <p className="text-[18px] font-bold text-white leading-none">—</p>
-                </div>
-              ))}
+        <>
+          {/* Free: 회사 개요 + 거장 코멘트만, 나머지는 블러 */}
+          {richReport && (
+            <div className="px-4 mb-4 space-y-4">
+              {/* 회사 개요 */}
+              <CompanyOverviewCard report={richReport} />
+              {/* 거장 코멘트 */}
+              <div className="rounded-3xl p-5" style={{ background: "linear-gradient(135deg, #1a2744 0%, #0f1b35 100%)", border: "1px solid rgba(79,138,255,0.2)" }}>
+                <p className="text-[11px] font-semibold text-[#4F8AFF]/80 uppercase tracking-widest mb-3">{analysis.master.name}의 한마디</p>
+                <p className="text-[14px] text-white/90 leading-relaxed">{richReport.masterComment}</p>
+              </div>
             </div>
-            <div className="bg-white/[0.04] rounded-3xl p-5 h-28" />
-            <div className="bg-white/[0.04] rounded-3xl p-5 h-24" />
-          </div>
+          )}
 
-          {/* 그라데이션 페이드 + 구독 CTA */}
-          <div
-            className="absolute inset-x-0 bottom-0 flex flex-col items-center pb-10 pt-40"
-            style={{ background: "linear-gradient(to bottom, transparent 0%, #0d0d1a 40%)" }}
-          >
-            <div className="flex items-center gap-1.5 mb-5">
-              <Lock className="w-4 h-4 text-white/40" />
-              <span className="text-[12px] text-white/40">PRO 전용 분석</span>
+          {/* 블러 + 페이월 */}
+          <div className="relative">
+            <div className="px-4 space-y-4 blur-sm pointer-events-none select-none" aria-hidden>
+              <div className="grid grid-cols-2 gap-2.5">
+                {["PER", "PBR", "ROE", "EPS", "매출성장", "부채비율", "배당수익률", "베타"].map((l) => (
+                  <div key={l} className="bg-white/[0.04] rounded-2xl px-4 py-3">
+                    <p className="text-[11px] text-white/40 mb-1">{l}</p>
+                    <p className="text-[18px] font-bold text-white leading-none">—</p>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-white/[0.04] rounded-3xl p-5 h-28" />
+              <div className="bg-white/[0.04] rounded-3xl p-5 h-24" />
             </div>
-            <h2 className="text-[26px] font-black text-white mb-3 text-center">
-              PRO를 구독하세요.
-            </h2>
-            <p className="text-[14px] text-white/50 text-center leading-relaxed mb-8 px-6">
-              퀀트 지표, 수익성 분석, 리스크 분석 등<br />
-              전문가 수준의 상세 분석을 확인하세요.
-            </p>
-            <Link
-              href="/mypage/subscription"
-              className="px-10 py-4 bg-white text-black text-[16px] font-bold rounded-full hover:bg-white/90 transition-opacity"
-            >
-              구독하기
-            </Link>
+            <div className="absolute inset-x-0 bottom-0 flex flex-col items-center pb-10 pt-40" style={{ background: "linear-gradient(to bottom, transparent 0%, #0d0d1a 40%)" }}>
+              <div className="flex items-center gap-1.5 mb-5">
+                <Lock className="w-4 h-4 text-white/40" />
+                <span className="text-[12px] text-white/40">PRO 전용 분석</span>
+              </div>
+              <h2 className="text-[26px] font-black text-white mb-3 text-center">PRO를 구독하세요.</h2>
+              <p className="text-[14px] text-white/50 text-center leading-relaxed mb-8 px-6">
+                16파트 심층 분석, 재무테이블, 업계 분석,<br />
+                Porter's 5 Forces, SWOT, 투자 전략까지.
+              </p>
+              <Link href="/mypage/subscription" className="px-10 py-4 bg-white text-black text-[16px] font-bold rounded-full hover:bg-white/90 transition-opacity">
+                구독하기
+              </Link>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

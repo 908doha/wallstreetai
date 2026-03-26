@@ -1,5 +1,5 @@
 import https from "node:https";
-import type { ClaudeAnalysisResponse } from "@/types";
+import type { ClaudeRichAnalysisResponse } from "@/types";
 
 function callClaude(system: string, user: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
@@ -7,7 +7,7 @@ function callClaude(system: string, user: string): Promise<string> {
 
   const bodyStr = JSON.stringify({
     model: "claude-sonnet-4-6",
-    max_tokens: 2000,
+    max_tokens: 8000,
     system,
     messages: [{ role: "user", content: user }],
   });
@@ -50,10 +50,115 @@ function callClaude(system: string, user: string): Promise<string> {
   });
 }
 
+const SYSTEM_PROMPT = `당신은 전문 주식 분석가입니다. 아래 16파트 분석 프레임워크를 따라 주어진 종목을 깊이 있게 분석하고, 반드시 아래 JSON 형식으로만 응답하세요.
+
+분석 프레임워크:
+- PART I: 재무 보고서 분석 (수직 분석, 재무비율분석, 건전성 평가)
+- PART II: 업계 상태 분석 (시장 포지셔닝, Porter's 5 Forces, 경쟁사 비교, SWOT)
+- PART III-XV: 경영진, 해자, 제품/서비스, 기술적 분석, 시장 센티먼트, 거시경제 분석
+- PART XVI: 종합 분석 및 투자 전략
+
+반드시 아래 JSON 구조로만 응답하세요:
+{
+  "recommendation": "BUY" | "HOLD" | "SELL",
+  "score": <0-100 정수>,
+  "companyOverview": {
+    "name": "<회사명>",
+    "ticker": "<티커>",
+    "exchange": "<거래소>",
+    "sector": "<섹터/산업>",
+    "description": "<50자 이내 핵심 설명>",
+    "keyStats": [
+      { "label": "현재 주가", "value": "<값>", "highlight": false },
+      { "label": "시가총액", "value": "<값>", "highlight": false },
+      { "label": "매출(최근)", "value": "<값>", "highlight": true },
+      { "label": "순이익률", "value": "<값>", "highlight": false },
+      { "label": "현금/부채", "value": "<값>", "highlight": true }
+    ]
+  },
+  "financialTable": {
+    "periods": ["FY22", "FY23", "FY24", "FY25", "YoY"],
+    "rows": [
+      { "label": "총 매출액", "values": ["<값>", "<값>", "<값>", "<값>", "<변화율>"], "highlight": false, "isPositive": true },
+      { "label": "영업이익(손실)", "values": ["<값>", "<값>", "<값>", "<값>", "<변화율>"], "highlight": true, "isPositive": null },
+      { "label": "순이익", "values": ["<값>", "<값>", "<값>", "<값>", "<변화율>"], "highlight": false, "isPositive": null },
+      { "label": "GAAP 총이익률", "values": ["<값>", "<값>", "<값>", "<값>", "<변화율>"], "highlight": false, "isPositive": true },
+      { "label": "잉여현금흐름(FCF)", "values": ["<값>", "<값>", "<값>", "<값>", "<변화율>"], "highlight": false, "isPositive": null },
+      { "label": "현금(부채)", "values": ["<값>", "<값>", "<값>", "<값>", "N/A"], "highlight": true, "isPositive": null }
+    ],
+    "summary": "<재무 상황 2-3문장 요약>"
+  },
+  "ratioAnalysis": [
+    { "category": "수익성", "metric": "GAAP 총이익률", "currentValue": "<값>", "benchmark": "40%↑", "verdict": "excellent" },
+    { "category": "수익성", "metric": "영업이익률", "currentValue": "<값>", "benchmark": "20%↑", "verdict": "good" },
+    { "category": "성장성", "metric": "매출 성장률(YoY)", "currentValue": "<값>", "benchmark": "10%↑", "verdict": "fair" },
+    { "category": "안정성", "metric": "부채비율", "currentValue": "<값>", "benchmark": "낮을수록↓", "verdict": "excellent" },
+    { "category": "안정성", "metric": "유동비율", "currentValue": "<값>", "benchmark": "1.5↑", "verdict": "good" },
+    { "category": "수익성", "metric": "ROE", "currentValue": "<값>", "benchmark": "15%↑", "verdict": "fair" },
+    { "category": "밸류에이션", "metric": "PER", "currentValue": "<값>", "benchmark": "업종평균↓", "verdict": "fair" },
+    { "category": "밸류에이션", "metric": "PBR", "currentValue": "<값>", "benchmark": "업종평균↓", "verdict": "fair" }
+  ],
+  "financialGrade": "<등급 및 한줄 평가, 예: A- (우수)>",
+  "financialSummary": "<재무 건전성 종합 평가 2-3문장>",
+  "industryAnalysis": {
+    "marketPositionSummary": "<시장 포지셔닝 및 점유율 2-3문장>",
+    "marketShareData": [
+      { "company": "<회사명>", "share": <숫자> },
+      { "company": "<경쟁사1>", "share": <숫자> },
+      { "company": "<경쟁사2>", "share": <숫자> },
+      { "company": "<경쟁사3>", "share": <숫자> },
+      { "company": "기타", "share": <숫자> }
+    ],
+    "competitorTable": [
+      { "company": "<경쟁사>", "marketShare": "<점유율>", "strength": "<핵심강점>", "threatLevel": "high" | "medium" | "low" },
+      { "company": "<경쟁사>", "marketShare": "<점유율>", "strength": "<핵심강점>", "threatLevel": "high" | "medium" | "low" },
+      { "company": "<경쟁사>", "marketShare": "<점유율>", "strength": "<핵심강점>", "threatLevel": "high" | "medium" | "low" }
+    ],
+    "portersFiveForces": [
+      { "factor": "신규 진입 위협", "level": "low" | "medium" | "high", "detail": "<한줄 설명>" },
+      { "factor": "대체재 위협", "level": "low" | "medium" | "high", "detail": "<한줄 설명>" },
+      { "factor": "공급자 교섭력", "level": "low" | "medium" | "high", "detail": "<한줄 설명>" },
+      { "factor": "구매자 교섭력", "level": "low" | "medium" | "high", "detail": "<한줄 설명>" },
+      { "factor": "기존 경쟁 강도", "level": "low" | "medium" | "high", "detail": "<한줄 설명>" }
+    ],
+    "trendSummary": "<업계 동향 및 성장 전망 2-3문장>"
+  },
+  "swot": {
+    "strengths": ["<강점1>", "<강점2>", "<강점3>"],
+    "weaknesses": ["<약점1>", "<약점2>"],
+    "opportunities": ["<기회1>", "<기회2>", "<기회3>"],
+    "threats": ["<위협1>", "<위협2>"]
+  },
+  "masterComment": "<거장의 투자 철학과 스타일로 작성한 한국어 종합 분석 코멘트, 4-5 문단. 재무 건전성, 업계 포지셔닝, 리스크, 투자 판단을 포함>",
+  "investmentStrategy": {
+    "shortTerm": "<1-3개월 단기 전략 한줄>",
+    "midTerm": "<3-12개월 중기 전략 한줄>",
+    "longTerm": "<1년+ 장기 전략 한줄>",
+    "keyRisks": ["<핵심리스크1>", "<핵심리스크2>", "<핵심리스크3>"],
+    "targetPrice": "<목표주가 또는 적정 밸류에이션 범위>",
+    "riskLevel": "high" | "medium" | "low"
+  },
+  "quantMetrics": {
+    "currentPrice": <숫자 또는 null>,
+    "per": <숫자 또는 null>,
+    "pbr": <숫자 또는 null>,
+    "roe": <숫자 또는 null>,
+    "eps": <숫자 또는 null>,
+    "revenueGrowth": <숫자 또는 null>,
+    "debtRatio": <숫자 또는 null>,
+    "marketCap": <숫자 또는 null>,
+    "dividendYield": <숫자 또는 null>,
+    "beta": <숫자 또는 null>,
+    "fiftyTwoWeekHigh": <숫자 또는 null>,
+    "fiftyTwoWeekLow": <숫자 또는 null>,
+    "volume": null,
+    "averageVolume": null
+  }
+}`;
+
 export async function runAnalysis({
   ticker,
   companyName,
-  quantPrompt,
   masterPrompt,
   masterName,
   realDataSummary,
@@ -61,55 +166,30 @@ export async function runAnalysis({
 }: {
   ticker: string;
   companyName: string;
-  quantPrompt: string;
   masterPrompt: string;
   masterName: string;
   realDataSummary?: string;
-  realMetrics?: Partial<import("@/types").QuantMetrics>;
-}): Promise<ClaudeAnalysisResponse> {
-  const systemPrompt = `${quantPrompt}
+  realMetrics?: Record<string, number | null>;
+}): Promise<ClaudeRichAnalysisResponse> {
+  const systemPrompt = `${SYSTEM_PROMPT}
 
 ${masterPrompt}
 
-당신은 ${masterName}의 관점에서 주식을 분석합니다. 반드시 아래 JSON 형식으로만 응답하세요:
-{
-  "recommendation": "BUY" | "HOLD" | "SELL",
-  "score": <0-100 사이의 정수>,
-  "masterComment": "<${masterName}의 말투와 스타일로 작성한 한국어 코멘트, 3-4 문단>",
-  "reasoning": "<한국어로 간략한 근거>",
-  "quantMetrics": {
-    "per": <실제 데이터 우선, 없으면 추정값 또는 null>,
-    "pbr": <실제 데이터 우선, 없으면 추정값 또는 null>,
-    "roe": <실제 데이터 우선, 없으면 추정값 또는 null>,
-    "eps": <실제 데이터 우선, 없으면 추정값 또는 null>,
-    "revenueGrowth": <실제 데이터 우선, 없으면 추정값 또는 null>,
-    "debtRatio": <실제 데이터 우선, 없으면 추정값 또는 null>,
-    "marketCap": <실제 데이터 우선, 없으면 추정값 또는 null>,
-    "currentPrice": <실제 데이터 우선, 없으면 추정값 또는 null>,
-    "dividendYield": <실제 데이터 우선, 없으면 추정값 또는 null>,
-    "beta": <실제 데이터 우선, 없으면 추정값 또는 null>,
-    "fiftyTwoWeekHigh": <실제 데이터 우선 또는 null>,
-    "fiftyTwoWeekLow": <실제 데이터 우선 또는 null>,
-    "volume": null,
-    "averageVolume": null
-  }
-}`;
+당신은 ${masterName}의 관점에서 분석합니다. masterComment는 반드시 ${masterName}의 말투와 투자 철학을 반영하세요.`;
 
   const dataSection = realDataSummary
-    ? `\n\n── 실시간 재무 데이터 (Yahoo Finance) ──\n${realDataSummary}\n\n위 실제 데이터를 바탕으로 분석하고, quantMetrics에는 위 데이터의 수치를 그대로 사용하세요.`
-    : `\n당신이 알고 있는 이 기업의 재무 정보, 사업 모델, 경쟁력, 시장 포지션을 바탕으로 분석하고 주요 퀀트 지표를 추정하여 포함해주세요.`;
+    ? `\n\n── 실시간 재무 데이터 (Yahoo Finance) ──\n${realDataSummary}\n\n위 실제 데이터를 우선 활용하고, 추가 분석은 공개 정보 기반으로 수행하세요.`
+    : "";
 
-  const userMessage = `다음 종목을 ${masterName}의 투자 철학으로 분석해주세요:
+  const userMessage = `다음 종목을 ${masterName}의 투자 철학으로 16파트 프레임워크에 따라 심층 분석해주세요:
 
 종목: ${ticker} (${companyName})${dataSection}`;
 
   const text = (await callClaude(systemPrompt, userMessage)).trim();
   const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error("Could not parse JSON from Claude response");
-  }
+  if (!jsonMatch) throw new Error("Could not parse JSON from Claude response");
 
-  const parsed = JSON.parse(jsonMatch[0]) as ClaudeAnalysisResponse;
+  const parsed = JSON.parse(jsonMatch[0]) as ClaudeRichAnalysisResponse;
 
   if (!["BUY", "HOLD", "SELL"].includes(parsed.recommendation)) {
     throw new Error("Invalid recommendation from Claude");
@@ -120,19 +200,6 @@ ${masterPrompt}
 
   return parsed;
 }
-
-export const DEFAULT_QUANT_PROMPT = `당신은 전문 주식 분석가입니다. 다음 퀀트 분석 기준을 적용하여 주식을 평가하세요:
-
-1. 가치 평가 (PER, PBR): 업종 평균 대비 적정 수준인지 평가
-2. 수익성 (ROE, EPS): 높은 ROE와 일관된 EPS 성장 선호
-3. 성장성 (매출 성장률): 지속적인 성장 가능성 평가
-4. 재무 건전성 (부채비율): 과도한 레버리지 경계
-5. 배당 및 시장 위험 (배당수익률, 베타): 안정성 고려
-
-각 지표를 종합적으로 분석하여 0-100점 척도로 점수를 부여하세요.
-- 70점 이상: 강력 매수 추천
-- 40-70점: 보유 또는 조건부 매수
-- 40점 미만: 매도 또는 기피`;
 
 export const DEFAULT_MASTER_PROMPTS: Record<string, string> = {
   "warren-buffett": `당신은 워런 버핏입니다. 오마하의 현인으로서 가치 투자의 대가입니다.

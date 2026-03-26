@@ -1,5 +1,5 @@
 import { prisma } from "./prisma";
-import { runAnalysis, DEFAULT_QUANT_PROMPT, DEFAULT_MASTER_PROMPTS } from "./claude";
+import { runAnalysis, DEFAULT_MASTER_PROMPTS } from "./claude";
 import { fetchStockDataFromYahoo } from "./yahoo-finance";
 import type { AnalysisResult } from "@/types";
 import { v4 as uuidv4 } from "uuid";
@@ -27,13 +27,6 @@ export async function executeAnalysis({
     ? yahooData.companyName
     : upperTicker;
 
-  // Get active quant prompt
-  const quantPromptRecord = await prisma.quantPrompt.findFirst({
-    where: { isActive: true },
-    orderBy: { version: "desc" },
-  });
-  const quantPrompt = quantPromptRecord?.content || DEFAULT_QUANT_PROMPT;
-
   // Get active master prompt
   const masterPromptRecord = await prisma.masterPrompt.findFirst({
     where: { masterId, isActive: true },
@@ -46,11 +39,10 @@ export async function executeAnalysis({
   const claudeResult = await runAnalysis({
     ticker: upperTicker,
     companyName,
-    quantPrompt,
     masterPrompt,
     masterName: master.name,
     realDataSummary: yahooData.rawSummary,
-    realMetrics: yahooData.metrics,
+    realMetrics: yahooData.metrics as Record<string, number | null>,
   });
 
   // 실제 데이터로 Claude 추정값 보정 (실제 데이터 우선)
@@ -69,12 +61,13 @@ export async function executeAnalysis({
       userId: userId || null,
       masterId,
       ticker: upperTicker,
-      companyName,
+      companyName: claudeResult.companyOverview?.name || companyName,
       recommendation: claudeResult.recommendation,
       quantMetrics: (claudeResult.quantMetrics || {}) as object,
       masterComment: claudeResult.masterComment,
       score: Math.round(claudeResult.score),
       shareToken: uuidv4(),
+      reportData: claudeResult as object, // 전체 리치 리포트 저장
     },
     include: { master: true },
   });
@@ -91,6 +84,7 @@ export async function executeAnalysis({
     score: analysis.score,
     shareToken: analysis.shareToken,
     createdAt: analysis.createdAt,
+    reportData: analysis.reportData as import("@/types").RichAnalysisReport | null,
     master: {
       id: analysis.master.id,
       name: analysis.master.name,

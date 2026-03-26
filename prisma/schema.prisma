@@ -159,6 +159,7 @@ model Analysis {
   recommendation Recommendation
   quantMetrics   Json
   masterComment  String         @db.Text
+  reportData     Json?
   score          Int
   shareToken     String         @unique @default(cuid())
   createdAt      DateTime       @default(now())
