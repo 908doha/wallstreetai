@@ -60,9 +60,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, user, trigger, session }) {
-      if (user) {
+      if (user?.id) {
         token.id = user.id;
-        token.role = (user as { role: Role }).role;
+        // DB에서 직접 role 조회 (OAuth 로그인 시 user 객체에 role 미포함 문제 해결)
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { role: true },
+        });
+        token.role = dbUser?.role ?? (user as { role?: Role }).role;
       }
 
       if (trigger === "update" && session?.role) {
