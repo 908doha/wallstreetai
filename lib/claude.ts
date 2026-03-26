@@ -2,7 +2,7 @@ import https from "node:https";
 import type { ClaudeAnalysisResponse } from "@/types";
 
 function callClaude(system: string, user: string): Promise<string> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
 
   const bodyStr = JSON.stringify({
