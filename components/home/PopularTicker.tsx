@@ -65,14 +65,14 @@ export function PopularTicker({ stocks }: PopularTickerProps) {
         <span className="text-[11px] font-bold text-[#4F8AFF] flex-shrink-0">
           #{currentIndex + 1}
         </span>
-        {/* Ticker */}
-        <span className="text-[13px] font-bold text-white flex-shrink-0">
-          {current.ticker}
+        {/* Company */}
+        <span className="text-[13px] font-bold text-white truncate">
+          {current.companyName}
         </span>
         {recIcon}
-        {/* Company */}
-        <span className="text-[11px] text-white/45 truncate">
-          {current.companyName}
+        {/* Ticker */}
+        <span className="text-[11px] text-white/45 flex-shrink-0">
+          {current.ticker}
         </span>
       </div>
 

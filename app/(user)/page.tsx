@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getPopularStocks } from "@/lib/stock";
+import { getPopularStocks, getKoName } from "@/lib/stock";
 import { TopNav } from "@/components/layout/TopNav";
 import { Footer } from "@/components/layout/Footer";
 import { PopularTicker } from "@/components/home/PopularTicker";
@@ -43,7 +43,7 @@ async function getHomeData() {
         });
         return {
           ticker: row.ticker,
-          companyName: row.companyName,
+          companyName: getKoName(row.ticker, row.companyName),
           count: row._count.id,
           topRecommendation: top?.recommendation ?? undefined,
         };

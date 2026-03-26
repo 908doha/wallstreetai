@@ -199,27 +199,58 @@ function getMockStockData(ticker: string): StockData {
   };
 }
 
+export const TICKER_KO_NAMES: Record<string, string> = {
+  "AAPL": "애플",
+  "MSFT": "마이크로소프트",
+  "GOOGL": "알파벳 (구글)",
+  "GOOG": "알파벳 (구글)",
+  "AMZN": "아마존",
+  "NVDA": "엔비디아",
+  "TSLA": "테슬라",
+  "META": "메타 플랫폼스",
+  "BRK.B": "버크셔 해서웨이",
+  "JPM": "JP모건 체이스",
+  "V": "비자",
+  "JNJ": "존슨앤존슨",
+  "WMT": "월마트",
+  "MA": "마스터카드",
+  "PG": "프록터앤갬블",
+  "DIS": "월트 디즈니",
+  "NFLX": "넷플릭스",
+  "BABA": "알리바바",
+  "TSM": "TSMC",
+  "ASML": "ASML",
+  "005930.KS": "삼성전자",
+  "000660.KS": "SK하이닉스",
+  "035420.KS": "NAVER",
+  "035720.KS": "카카오",
+};
+
+export function getKoName(ticker: string, fallback: string): string {
+  return TICKER_KO_NAMES[ticker] ?? fallback;
+}
+
 export function getPopularStocks(): StockSearchResult[] {
   return [
-    { ticker: "AAPL", name: "Apple Inc.", exchange: "NASDAQ", type: "Equity" },
-    { ticker: "MSFT", name: "Microsoft Corporation", exchange: "NASDAQ", type: "Equity" },
-    { ticker: "GOOGL", name: "Alphabet Inc.", exchange: "NASDAQ", type: "Equity" },
-    { ticker: "AMZN", name: "Amazon.com Inc.", exchange: "NASDAQ", type: "Equity" },
-    { ticker: "NVDA", name: "NVIDIA Corporation", exchange: "NASDAQ", type: "Equity" },
-    { ticker: "TSLA", name: "Tesla, Inc.", exchange: "NASDAQ", type: "Equity" },
-    { ticker: "META", name: "Meta Platforms Inc.", exchange: "NASDAQ", type: "Equity" },
-    { ticker: "BRK.B", name: "Berkshire Hathaway Inc.", exchange: "NYSE", type: "Equity" },
-    { ticker: "JPM", name: "JPMorgan Chase & Co.", exchange: "NYSE", type: "Equity" },
-    { ticker: "V", name: "Visa Inc.", exchange: "NYSE", type: "Equity" },
-    { ticker: "JNJ", name: "Johnson & Johnson", exchange: "NYSE", type: "Equity" },
-    { ticker: "WMT", name: "Walmart Inc.", exchange: "NYSE", type: "Equity" },
-    { ticker: "MA", name: "Mastercard Incorporated", exchange: "NYSE", type: "Equity" },
-    { ticker: "PG", name: "Procter & Gamble Co.", exchange: "NYSE", type: "Equity" },
-    { ticker: "DIS", name: "The Walt Disney Company", exchange: "NYSE", type: "Equity" },
-    { ticker: "NFLX", name: "Netflix, Inc.", exchange: "NASDAQ", type: "Equity" },
-    { ticker: "BABA", name: "Alibaba Group", exchange: "NYSE", type: "Equity" },
-    { ticker: "TSM", name: "Taiwan Semiconductor", exchange: "NYSE", type: "Equity" },
-    { ticker: "ASML", name: "ASML Holding N.V.", exchange: "NASDAQ", type: "Equity" },
-    { ticker: "005930.KS", name: "Samsung Electronics", exchange: "KRX", type: "Equity" },
+    { ticker: "AAPL", name: "애플", exchange: "NASDAQ", type: "Equity" },
+    { ticker: "MSFT", name: "마이크로소프트", exchange: "NASDAQ", type: "Equity" },
+    { ticker: "GOOGL", name: "알파벳 (구글)", exchange: "NASDAQ", type: "Equity" },
+    { ticker: "AMZN", name: "아마존", exchange: "NASDAQ", type: "Equity" },
+    { ticker: "NVDA", name: "엔비디아", exchange: "NASDAQ", type: "Equity" },
+    { ticker: "TSLA", name: "테슬라", exchange: "NASDAQ", type: "Equity" },
+    { ticker: "META", name: "메타 플랫폼스", exchange: "NASDAQ", type: "Equity" },
+    { ticker: "BRK.B", name: "버크셔 해서웨이", exchange: "NYSE", type: "Equity" },
+    { ticker: "JPM", name: "JP모건 체이스", exchange: "NYSE", type: "Equity" },
+    { ticker: "V", name: "비자", exchange: "NYSE", type: "Equity" },
+    { ticker: "JNJ", name: "존슨앤존슨", exchange: "NYSE", type: "Equity" },
+    { ticker: "WMT", name: "월마트", exchange: "NYSE", type: "Equity" },
+    { ticker: "MA", name: "마스터카드", exchange: "NYSE", type: "Equity" },
+    { ticker: "PG", name: "프록터앤갬블", exchange: "NYSE", type: "Equity" },
+    { ticker: "DIS", name: "월트 디즈니", exchange: "NYSE", type: "Equity" },
+    { ticker: "NFLX", name: "넷플릭스", exchange: "NASDAQ", type: "Equity" },
+    { ticker: "BABA", name: "알리바바", exchange: "NYSE", type: "Equity" },
+    { ticker: "TSM", name: "TSMC", exchange: "NYSE", type: "Equity" },
+    { ticker: "ASML", name: "ASML", exchange: "NASDAQ", type: "Equity" },
+    { ticker: "005930.KS", name: "삼성전자", exchange: "KRX", type: "Equity" },
   ];
 }
