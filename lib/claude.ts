@@ -1,9 +1,34 @@
-import Anthropic from "@anthropic-ai/sdk";
 import type { ClaudeAnalysisResponse } from "@/types";
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+async function callClaude(system: string, user: string): Promise<string> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
+
+  const body = JSON.stringify({
+    model: "claude-sonnet-4-6",
+    max_tokens: 2000,
+    system,
+    messages: [{ role: "user", content: user }],
+  });
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body,
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Anthropic API error ${res.status}: ${err}`);
+  }
+
+  const data = await res.json();
+  return data.content?.[0]?.text ?? "";
+}
 
 export async function runAnalysis({
   ticker,
@@ -11,12 +36,16 @@ export async function runAnalysis({
   quantPrompt,
   masterPrompt,
   masterName,
+  realDataSummary,
+  realMetrics,
 }: {
   ticker: string;
   companyName: string;
   quantPrompt: string;
   masterPrompt: string;
   masterName: string;
+  realDataSummary?: string;
+  realMetrics?: Partial<import("@/types").QuantMetrics>;
 }): Promise<ClaudeAnalysisResponse> {
   const systemPrompt = `${quantPrompt}
 
@@ -29,42 +58,32 @@ ${masterPrompt}
   "masterComment": "<${masterName}의 말투와 스타일로 작성한 한국어 코멘트, 3-4 문단>",
   "reasoning": "<한국어로 간략한 근거>",
   "quantMetrics": {
-    "per": <PER 추정값 또는 null>,
-    "pbr": <PBR 추정값 또는 null>,
-    "roe": <ROE % 추정값 또는 null>,
-    "eps": <EPS 추정값 또는 null>,
-    "revenueGrowth": <매출성장률 % 추정값 또는 null>,
-    "debtRatio": <부채비율 추정값 또는 null>,
-    "marketCap": <시가총액 추정값(USD) 또는 null>,
-    "currentPrice": <현재 주가 추정값 또는 null>,
-    "dividendYield": <배당수익률 % 추정값 또는 null>,
-    "beta": <베타 추정값 또는 null>,
-    "fiftyTwoWeekHigh": null,
-    "fiftyTwoWeekLow": null,
+    "per": <실제 데이터 우선, 없으면 추정값 또는 null>,
+    "pbr": <실제 데이터 우선, 없으면 추정값 또는 null>,
+    "roe": <실제 데이터 우선, 없으면 추정값 또는 null>,
+    "eps": <실제 데이터 우선, 없으면 추정값 또는 null>,
+    "revenueGrowth": <실제 데이터 우선, 없으면 추정값 또는 null>,
+    "debtRatio": <실제 데이터 우선, 없으면 추정값 또는 null>,
+    "marketCap": <실제 데이터 우선, 없으면 추정값 또는 null>,
+    "currentPrice": <실제 데이터 우선, 없으면 추정값 또는 null>,
+    "dividendYield": <실제 데이터 우선, 없으면 추정값 또는 null>,
+    "beta": <실제 데이터 우선, 없으면 추정값 또는 null>,
+    "fiftyTwoWeekHigh": <실제 데이터 우선 또는 null>,
+    "fiftyTwoWeekLow": <실제 데이터 우선 또는 null>,
     "volume": null,
     "averageVolume": null
   }
 }`;
 
+  const dataSection = realDataSummary
+    ? `\n\n── 실시간 재무 데이터 (Yahoo Finance) ──\n${realDataSummary}\n\n위 실제 데이터를 바탕으로 분석하고, quantMetrics에는 위 데이터의 수치를 그대로 사용하세요.`
+    : `\n당신이 알고 있는 이 기업의 재무 정보, 사업 모델, 경쟁력, 시장 포지션을 바탕으로 분석하고 주요 퀀트 지표를 추정하여 포함해주세요.`;
+
   const userMessage = `다음 종목을 ${masterName}의 투자 철학으로 분석해주세요:
 
-종목: ${ticker} (${companyName})
+종목: ${ticker} (${companyName})${dataSection}`;
 
-당신이 알고 있는 이 기업의 재무 정보, 사업 모델, 경쟁력, 시장 포지션을 바탕으로 ${masterName}의 관점에서 투자 의견(매수/보유/매도)과 코멘트를 제시하세요. 알고 있는 범위 내에서 주요 퀀트 지표도 추정하여 포함해주세요.`;
-
-  const response = await client.messages.create({
-    model: "claude-opus-4-5",
-    max_tokens: 2000,
-    messages: [{ role: "user", content: userMessage }],
-    system: systemPrompt,
-  });
-
-  const content = response.content[0];
-  if (content.type !== "text") {
-    throw new Error("Unexpected response type from Claude API");
-  }
-
-  const text = content.text.trim();
+  const text = (await callClaude(systemPrompt, userMessage)).trim();
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     throw new Error("Could not parse JSON from Claude response");

@@ -120,30 +120,37 @@ export async function fetchStockData(ticker: string): Promise<StockData> {
 
 export async function searchStocks(query: string): Promise<StockSearchResult[]> {
   try {
-    const data = await fetchAlphaVantage({
-      function: "SYMBOL_SEARCH",
-      keywords: query,
+    const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=15&newsCount=0&enableFuzzyQuery=false&lang=en-US`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      next: { revalidate: 300 },
     });
 
-    const result = data as {
-      bestMatches?: Array<{
-        "1. symbol": string;
-        "2. name": string;
-        "4. region": string;
-        "3. type": string;
+    if (!res.ok) throw new Error("Yahoo Finance search failed");
+
+    const data = await res.json() as {
+      quotes?: Array<{
+        symbol: string;
+        longname?: string;
+        shortname?: string;
+        exchange?: string;
+        quoteType?: string;
       }>;
     };
 
-    if (!result.bestMatches) return [];
+    if (!data.quotes || data.quotes.length === 0) return [];
 
-    return result.bestMatches.slice(0, 10).map((match) => ({
-      ticker: match["1. symbol"],
-      name: match["2. name"],
-      exchange: match["4. region"],
-      type: match["3. type"],
-    }));
+    return data.quotes
+      .filter((q) => q.quoteType === "EQUITY" || q.quoteType === "ETF")
+      .slice(0, 10)
+      .map((q) => ({
+        ticker: q.symbol,
+        name: q.longname || q.shortname || q.symbol,
+        exchange: q.exchange || "",
+        type: q.quoteType || "Equity",
+      }));
   } catch {
-    // Return popular stocks as fallback
+    // Fallback to popular stocks filtered list
     return getPopularStocks().filter(
       (s) =>
         s.ticker.toLowerCase().includes(query.toLowerCase()) ||

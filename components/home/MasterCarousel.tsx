@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { Lock } from "lucide-react";
 
@@ -19,6 +18,7 @@ interface Master {
 interface MasterCarouselProps {
   masters: Master[];
   onMasterChange?: (master: Master) => void;
+  userRole?: string;
 }
 
 // 카드 이미지 없을 때 fallback 그라디언트
@@ -30,7 +30,8 @@ const CARD_GRADIENTS = [
   { from: "#0a1e2d", accent: "#0891b2" },
 ];
 
-export function MasterCarousel({ masters, onMasterChange }: MasterCarouselProps) {
+export function MasterCarousel({ masters, onMasterChange, userRole = "free" }: MasterCarouselProps) {
+  const isPaidUser = userRole === "pro" || userRole === "premium";
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -67,10 +68,10 @@ export function MasterCarousel({ masters, onMasterChange }: MasterCarouselProps)
           const hasImage = !!master.cardImageUrl;
 
           return (
-            <Link
+            <button
               key={master.id}
-              href={`/masters/${master.id}`}
-              className="flex-shrink-0 snap-center"
+              onClick={() => onMasterChange?.(master)}
+              className={`flex-shrink-0 snap-center text-left transition-opacity ${master.isPremium && !isPaidUser ? "opacity-40" : "opacity-100"}`}
               style={{ width: "calc(80vw)", maxWidth: 320 }}
             >
               <div
@@ -154,27 +155,11 @@ export function MasterCarousel({ masters, onMasterChange }: MasterCarouselProps)
                   </p>
                 </div>
               </div>
-            </Link>
+            </button>
           );
         })}
       </div>
 
-      {/* Dot indicators */}
-      {masters.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-3">
-          {masters.map((_, i) => (
-            <span
-              key={i}
-              className="block rounded-full transition-all duration-300"
-              style={{
-                width: i === activeIndex ? 20 : 5,
-                height: 5,
-                background: i === activeIndex ? "#4F8AFF" : "rgba(255,255,255,0.15)",
-              }}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }

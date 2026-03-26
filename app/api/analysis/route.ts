@@ -58,9 +58,9 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    console.error("Analysis error:", error);
     const message =
       error instanceof Error ? error.message : "분석 중 오류가 발생했습니다";
+    console.error("Analysis error:", message, error);
     return NextResponse.json(
       { success: false, error: message },
       { status: 500 }

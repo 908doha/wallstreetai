@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Search, BarChart2, Loader2, TrendingUp } from "lucide-react";
+import { Search, BarChart2, TrendingUp, Loader2 } from "lucide-react";
 import { MasterCarousel } from "@/components/home/MasterCarousel";
 import type { StockSearchResult } from "@/types";
 
@@ -19,9 +19,10 @@ interface Master {
 
 interface HomeMasterSectionProps {
   masters: Master[];
+  userRole?: string;
 }
 
-export function HomeMasterSection({ masters }: HomeMasterSectionProps) {
+export function HomeMasterSection({ masters, userRole = "free" }: HomeMasterSectionProps) {
   const router = useRouter();
   const [selectedMaster, setSelectedMaster] = useState<Master | null>(
     masters[0] ?? null
@@ -76,11 +77,14 @@ export function HomeMasterSection({ masters }: HomeMasterSectionProps) {
     setIsOpen(false);
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!selectedMaster || !selectedStock) return;
-    router.push(
-      `/analysis?masterId=${selectedMaster.id}&ticker=${selectedStock.ticker}&company=${encodeURIComponent(selectedStock.name)}`
-    );
+    const params = new URLSearchParams({
+      ticker: selectedStock.ticker,
+      masterId: selectedMaster.id,
+      masterName: selectedMaster.name,
+    });
+    router.push(`/analysis/loading?${params.toString()}`);
   };
 
   const handleMasterChange = useCallback((master: Master) => {
@@ -93,20 +97,13 @@ export function HomeMasterSection({ masters }: HomeMasterSectionProps) {
     <section className="space-y-3">
       {/* Carousel */}
       <div className="-mx-4">
-        <MasterCarousel masters={masters} onMasterChange={handleMasterChange} />
+        <MasterCarousel masters={masters} onMasterChange={handleMasterChange} userRole={userRole} />
       </div>
 
       {/* Stock input */}
+      <p className="text-[13px] text-white/45 mb-3 mt-8">종목을 골라보세요</p>
       <div ref={containerRef} className="relative">
         <div className="glass-card rounded-2xl px-4 py-3 flex items-center gap-3">
-          {/* Selected master indicator */}
-          {selectedMaster && (
-            <div className="flex-shrink-0 flex items-center gap-1.5 text-[11px] text-white/50 whitespace-nowrap">
-              <span className="text-white/80 font-semibold">{selectedMaster.name}</span>
-              <span className="text-white/20">|</span>
-            </div>
-          )}
-
           {/* Search input */}
           <div className="flex-1 relative">
             <input
@@ -124,16 +121,6 @@ export function HomeMasterSection({ masters }: HomeMasterSectionProps) {
               <Search className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/20 pointer-events-none" />
             )}
           </div>
-
-          {/* Analyze button */}
-          <button
-            onClick={handleAnalyze}
-            disabled={!canAnalyze}
-            className="flex-shrink-0 flex items-center gap-1.5 h-8 px-3 rounded-xl bg-[#4F8AFF] text-white text-[12px] font-bold disabled:opacity-30 transition-opacity hover:opacity-90 active:opacity-75"
-          >
-            <BarChart2 className="w-3.5 h-3.5" strokeWidth={2.5} />
-            분석
-          </button>
         </div>
 
         {/* Dropdown results */}
@@ -160,6 +147,16 @@ export function HomeMasterSection({ masters }: HomeMasterSectionProps) {
           </div>
         )}
       </div>
+
+      {/* Analyze button - full width below input */}
+      <button
+        onClick={handleAnalyze}
+        disabled={!canAnalyze}
+        className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-[#4F8AFF] text-white text-[15px] font-bold disabled:opacity-30 transition-opacity hover:opacity-90 active:opacity-75"
+      >
+        <BarChart2 className="w-4 h-4" strokeWidth={2.5} />
+        {selectedMaster ? `${selectedMaster.name}의 분석` : "분석"}
+      </button>
     </section>
   );
 }

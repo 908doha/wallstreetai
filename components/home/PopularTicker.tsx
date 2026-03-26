@@ -48,7 +48,7 @@ export function PopularTicker({ stocks }: PopularTickerProps) {
       {/* Label */}
       <div className="flex items-center gap-1.5 flex-shrink-0">
         <Flame className="w-3.5 h-3.5 text-orange-400 animate-pulse" strokeWidth={2} />
-        <span className="text-[11px] font-semibold text-white/60 whitespace-nowrap">
+        <span className="text-[11px] font-bold text-white/80 whitespace-nowrap">
           실시간 인기 종목
         </span>
       </div>
@@ -76,23 +76,6 @@ export function PopularTicker({ stocks }: PopularTickerProps) {
         </span>
       </div>
 
-      {/* Dot indicators (up to 5 shown) */}
-      <div className="flex gap-1 flex-shrink-0">
-        {stocks.slice(0, Math.min(5, stocks.length)).map((_, i) => (
-          <span
-            key={i}
-            className="block rounded-full transition-all duration-300"
-            style={{
-              width: i === currentIndex % Math.min(5, stocks.length) ? 12 : 5,
-              height: 5,
-              background:
-                i === currentIndex % Math.min(5, stocks.length)
-                  ? "#4F8AFF"
-                  : "rgba(255,255,255,0.18)",
-            }}
-          />
-        ))}
-      </div>
     </div>
   );
 }

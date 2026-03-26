@@ -36,11 +36,53 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     background-color: #0a0a1a;
     color: #f0f4f8;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
+/* ── Light mode overrides ────────────────────────────── */
+html.light body {
+  background-color: #f2f2f7;
+  color: #1a1a2e;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #e5e5ea;
+}
+
+/* Text color overrides */
+html.light .text-white          { color: rgb(26 26 46) !important; }
+html.light .text-white\/90      { color: rgb(26 26 46 / 0.9) !important; }
+html.light .text-white\/80      { color: rgb(26 26 46 / 0.8) !important; }
+html.light .text-white\/70      { color: rgb(26 26 46 / 0.7) !important; }
+html.light .text-white\/60      { color: rgb(26 26 46 / 0.6) !important; }
+html.light .text-white\/50      { color: rgb(26 26 46 / 0.5) !important; }
+html.light .text-white\/45      { color: rgb(26 26 46 / 0.45) !important; }
+html.light .text-white\/40      { color: rgb(26 26 46 / 0.4) !important; }
+html.light .text-white\/35      { color: rgb(26 26 46 / 0.35) !important; }
+html.light .text-white\/30      { color: rgb(26 26 46 / 0.3) !important; }
+html.light .text-white\/25      { color: rgb(26 26 46 / 0.25) !important; }
+html.light .text-white\/20      { color: rgb(26 26 46 / 0.2) !important; }
+html.light .text-white\/10      { color: rgb(26 26 46 / 0.1) !important; }
+
+/* Placeholder */
+html.light input::placeholder   { color: rgba(26, 26, 46, 0.3) !important; }
+
+/* Gray text */
+html.light .text-gray-300       { color: rgb(80 80 100) !important; }
+html.light .text-gray-200       { color: rgb(80 80 100) !important; }
+
+/* Section divider */
+html.light .bg-white\/\[0\.04\] { background-color: rgba(0, 0, 0, 0.06) !important; }
+
+/* Border overrides */
+html.light .border-white\/\[0\.07\] { border-color: rgba(0,0,0,0.07) !important; }
+html.light .border-white\/\[0\.08\] { border-color: rgba(0,0,0,0.08) !important; }
+html.light .border-white\/10         { border-color: rgba(0,0,0,0.08) !important; }
+html.light .border-white\/\[0\.06\]  { border-color: rgba(0,0,0,0.06) !important; }
+
 @layer utilities {
-  /* ── Liquid Glass ─────────────────────────────────── */
+  /* ── Liquid Glass (dark) ──────────────────────────── */
   .glass {
     background: rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(20px) saturate(160%);
@@ -117,6 +159,30 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* ── Light mode glass overrides ──────────────────────── */
+html.light .glass {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+html.light .glass-card {
+  background: rgba(255, 255, 255, 0.80);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+
+html.light .glass-dark {
+  background: rgba(240, 240, 248, 0.95);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+html.light .glass-gold {
+  background: rgba(79, 138, 255, 0.08);
+  border: 1px solid rgba(79, 138, 255, 0.22);
 }
 
 /* Custom scrollbar */

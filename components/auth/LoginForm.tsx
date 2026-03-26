@@ -5,13 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
 
 const schema = z.object({
   email: z.string().email("올바른 이메일을 입력하세요"),
@@ -20,11 +18,15 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-export function LoginForm() {
+export function LoginForm({
+  callbackUrl = "/",
+  error,
+}: {
+  callbackUrl?: string;
+  error?: string;
+}) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const { toast } = useToast();
 
   const {
     register,
@@ -34,31 +36,26 @@ export function LoginForm() {
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
-    try {
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        toast({
-          title: "로그인 실패",
-          description: "이메일 또는 비밀번호를 확인하세요",
-          variant: "destructive",
-        });
-      } else {
-        router.push("/");
-        router.refresh();
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      callbackUrl,
+    });
+    // NextAuth handles redirect on both success and failure
+    // On failure it redirects back to /auth/login?error=...
+    setIsLoading(false);
   };
 
   const handleGoogleSignIn = async () => {
-    await signIn("google", { callbackUrl: "/" });
+    await signIn("google", { callbackUrl });
   };
+
+  const errorMessage =
+    error === "CredentialsSignin"
+      ? "이메일 또는 비밀번호를 확인하세요"
+      : error
+      ? "로그인 중 오류가 발생했습니다"
+      : null;
 
   return (
     <div className="w-full max-w-sm mx-auto space-y-6">
@@ -72,6 +69,12 @@ export function LoginForm() {
           Wall Street AI에 오신 것을 환영합니다
         </p>
       </div>
+
+      {errorMessage && (
+        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-400 text-center">
+          {errorMessage}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1.5">
@@ -175,7 +178,10 @@ export function LoginForm() {
 
       <p className="text-center text-sm text-gray-400">
         계정이 없으신가요?{" "}
-        <Link href="/auth/register" className="text-[#4F8AFF] hover:underline font-medium">
+        <Link
+          href="/auth/register"
+          className="text-[#4F8AFF] hover:underline font-medium"
+        >
           회원가입
         </Link>
       </p>

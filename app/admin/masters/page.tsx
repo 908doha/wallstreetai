@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { MasterToggle } from "./MasterToggle";
+import { MasterOrderControls } from "./MasterOrderControls";
 
 async function getMasters() {
   return prisma.master.findMany({
-    orderBy: { createdAt: "asc" },
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
     include: {
       _count: { select: { analyses: true } },
     },
@@ -63,6 +64,10 @@ export default async function AdminMastersPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
+                  <MasterOrderControls
+                    master={{ id: master.id, order: master.order }}
+                    masters={masters.map((m) => ({ id: m.id, order: m.order }))}
+                  />
                   <MasterToggle masterId={master.id} isActive={master.isActive} />
                   <Link href={`/admin/masters/${master.id}/edit`}>
                     <Button variant="outline" size="icon" className="h-8 w-8 border-white/20">

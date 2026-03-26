@@ -18,7 +18,7 @@ async function getHomeData() {
       prisma.master.findMany({
         where: { isActive: true },
         take: 5,
-        orderBy: { createdAt: "asc" },
+        orderBy: [{ order: "asc" }, { createdAt: "asc" }],
       }),
       prisma.analysis.findMany({
         take: 5,
@@ -84,23 +84,25 @@ export default async function HomePage() {
         {/* ── Banner (CMS) ─────────────────────────────── */}
         <BannerDisplay />
 
+        {/* ── Section Divider ──────────────────────────── */}
+        <div className="mt-20 -mx-4 h-3 bg-white/[0.04]" />
+
         {/* ── Masters + 주식 입력 ───────────────────────── */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[13px] font-semibold text-white/90 uppercase tracking-widest">
-              투자 마스터
+        <div className="mt-[30px]">
+          <div className="mb-3">
+            <h2 className="text-[20px] font-bold text-white">
+              🔍 주식 거장에게 물어보기
             </h2>
-            <Link
-              href="/masters"
-              className="text-[12px] text-[#4F8AFF]/80 flex items-center gap-0.5 hover:text-[#4F8AFF] transition-colors"
-            >
-              전체보기 <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
+            <p className="text-[13px] text-white/45 mt-[15px]">누구에게 물어볼까요?</p>
           </div>
-          <HomeMasterSection masters={masters} />
+          <HomeMasterSection masters={masters} userRole={session?.user?.role ?? "free"} />
         </div>
 
+        {/* ── Section Divider ──────────────────────────── */}
+        <div className="mt-[50px] -mx-4 h-3 bg-white/[0.04]" />
+
         {/* ── Sign-up prompt ───────────────────────────── */}
+        {!session?.user && <div className="mt-4" />}
         {!session?.user && (
           <div className="glass-card rounded-2xl p-4 flex items-center gap-3">
             <div className="w-10 h-10 glass-gold rounded-xl flex items-center justify-center flex-shrink-0">

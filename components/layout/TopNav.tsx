@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { TrendingUp, Search, X } from "lucide-react";
+import { Search, X, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/Providers";
 
 interface TopNavProps {
   title?: string;
@@ -23,6 +24,7 @@ export function TopNav({ title, showLogo = true, rightElement }: TopNavProps) {
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const pathname = usePathname();
+  const { theme, toggle } = useTheme();
 
   // close on route change
   useEffect(() => {
@@ -63,9 +65,6 @@ export function TopNav({ title, showLogo = true, rightElement }: TopNavProps) {
           {/* Left: Logo or title */}
           {showLogo ? (
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center w-8 h-8 glass-gold rounded-xl">
-                <TrendingUp className="w-4 h-4 text-[#4F8AFF]" strokeWidth={2.5} />
-              </div>
               <span className="font-bold text-[15px] tracking-tight text-white">
                 Wall Street <span className="text-[#4F8AFF]">AI</span>
               </span>
@@ -88,7 +87,6 @@ export function TopNav({ title, showLogo = true, rightElement }: TopNavProps) {
               onClick={openMenu}
               className="w-9 h-9 flex items-center justify-center rounded-full glass hover:bg-white/10 transition-colors"
             >
-              {/* Custom hamburger lines */}
               <span className="flex flex-col gap-[5px]">
                 <span className="block w-[18px] h-[1.5px] bg-gray-200 rounded-full" />
                 <span className="block w-[18px] h-[1.5px] bg-gray-200 rounded-full" />
@@ -155,12 +153,31 @@ export function TopNav({ title, showLogo = true, rightElement }: TopNavProps) {
               })}
             </nav>
 
+            {/* Theme toggle */}
+            <div className="px-7 pt-4">
+              <button
+                onClick={toggle}
+                className="w-full flex items-center justify-between h-12 px-4 rounded-2xl glass transition-opacity hover:opacity-80"
+              >
+                <span className="text-[14px] font-medium text-white/80">
+                  {theme === "dark" ? "라이트 모드" : "다크 모드"}
+                </span>
+                <div className="w-8 h-8 flex items-center justify-center rounded-full glass-gold">
+                  {theme === "dark" ? (
+                    <Sun className="w-4 h-4 text-[#4F8AFF]" />
+                  ) : (
+                    <Moon className="w-4 h-4 text-[#4F8AFF]" />
+                  )}
+                </div>
+              </button>
+            </div>
+
             {/* CTA at bottom */}
-            <div className="px-7 pb-10 pt-4 space-y-3">
+            <div className="px-7 pb-10 pt-3 space-y-3">
               <Link
                 href="/auth/login"
                 onClick={closeMenu}
-                className="block w-full h-12 rounded-2xl bg-[#4F8AFF] text-[#0a0a1a] font-bold text-[15px] flex items-center justify-center transition-opacity hover:opacity-90 active:opacity-80"
+                className="block w-full h-12 rounded-2xl bg-[#4F8AFF] text-white font-bold text-[15px] flex items-center justify-center transition-opacity hover:opacity-90 active:opacity-80"
               >
                 로그인
               </Link>

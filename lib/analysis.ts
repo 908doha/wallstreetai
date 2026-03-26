@@ -1,6 +1,6 @@
 import { prisma } from "./prisma";
-import { searchStocks } from "./stock";
 import { runAnalysis, DEFAULT_QUANT_PROMPT, DEFAULT_MASTER_PROMPTS } from "./claude";
+import { fetchStockDataFromYahoo } from "./yahoo-finance";
 import type { AnalysisResult } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
@@ -21,15 +21,11 @@ export async function executeAnalysis({
   });
   if (!master) throw new Error("Master not found");
 
-  // Get company name via search (best-effort)
-  let companyName = upperTicker;
-  try {
-    const results = await searchStocks(upperTicker);
-    const match = results.find((r) => r.ticker === upperTicker);
-    if (match) companyName = match.name;
-  } catch {
-    // fallback to ticker
-  }
+  // Yahoo Finance로 실시간 재무 데이터 조회
+  const yahooData = await fetchStockDataFromYahoo(upperTicker);
+  const companyName = yahooData.companyName !== upperTicker
+    ? yahooData.companyName
+    : upperTicker;
 
   // Get active quant prompt
   const quantPromptRecord = await prisma.quantPrompt.findFirst({
@@ -46,14 +42,26 @@ export async function executeAnalysis({
   const masterPrompt =
     masterPromptRecord?.content || DEFAULT_MASTER_PROMPTS[master.slug] || "";
 
-  // Run Claude analysis (pure LLM, no external data)
+  // Run Claude analysis with real financial data
   const claudeResult = await runAnalysis({
     ticker: upperTicker,
     companyName,
     quantPrompt,
     masterPrompt,
     masterName: master.name,
+    realDataSummary: yahooData.rawSummary,
+    realMetrics: yahooData.metrics,
   });
+
+  // 실제 데이터로 Claude 추정값 보정 (실제 데이터 우선)
+  if (claudeResult.quantMetrics && yahooData.metrics) {
+    claudeResult.quantMetrics = {
+      ...claudeResult.quantMetrics,
+      ...Object.fromEntries(
+        Object.entries(yahooData.metrics).filter(([, v]) => v !== null && v !== undefined)
+      ),
+    };
+  }
 
   // Save to database
   const analysis = await prisma.analysis.create({

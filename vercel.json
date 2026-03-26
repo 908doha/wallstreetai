@@ -3,5 +3,10 @@
   "env": {
     "NEXT_TELEMETRY_DISABLED": "1",
     "CI": "false"
+  },
+  "functions": {
+    "app/api/analysis/route.ts": {
+      "maxDuration": 60
+    }
   }
 }
