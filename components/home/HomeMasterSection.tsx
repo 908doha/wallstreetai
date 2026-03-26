@@ -73,7 +73,7 @@ export function HomeMasterSection({ masters, userRole = "free" }: HomeMasterSect
 
   const handleSelectStock = (stock: StockSearchResult) => {
     setSelectedStock(stock);
-    setQuery(`${stock.ticker} · ${stock.name}`);
+    setQuery(`${stock.name} (${stock.ticker})`);
     setIsOpen(false);
   };
 

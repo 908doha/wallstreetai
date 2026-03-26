@@ -1,36 +1,53 @@
+import https from "node:https";
 import type { ClaudeAnalysisResponse } from "@/types";
 
-async function callClaude(system: string, user: string): Promise<string> {
+function callClaude(system: string, user: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
 
-  // TextEncoder로 UTF-8 바이트 변환 → ByteString 오류 방지
-  const body = new TextEncoder().encode(
-    JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 2000,
-      system,
-      messages: [{ role: "user", content: user }],
-    })
-  );
-
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body,
+  const bodyStr = JSON.stringify({
+    model: "claude-sonnet-4-6",
+    max_tokens: 2000,
+    system,
+    messages: [{ role: "user", content: user }],
   });
+  const bodyBuf = Buffer.from(bodyStr, "utf8");
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Anthropic API error ${res.status}: ${err}`);
-  }
-
-  const data = await res.json();
-  return data.content?.[0]?.text ?? "";
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      {
+        hostname: "api.anthropic.com",
+        path: "/v1/messages",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "Content-Length": bodyBuf.length,
+        },
+      },
+      (res) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (c: Buffer) => chunks.push(c));
+        res.on("end", () => {
+          try {
+            const text = Buffer.concat(chunks).toString("utf8");
+            const data = JSON.parse(text);
+            if ((res.statusCode ?? 0) >= 400) {
+              reject(new Error(`Anthropic API error ${res.statusCode}: ${text}`));
+              return;
+            }
+            resolve(data.content?.[0]?.text ?? "");
+          } catch (e) {
+            reject(e);
+          }
+        });
+      }
+    );
+    req.on("error", reject);
+    req.write(bodyBuf);
+    req.end();
+  });
 }
 
 export async function runAnalysis({
